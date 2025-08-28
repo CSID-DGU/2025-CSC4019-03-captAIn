@@ -18,4 +18,4 @@ npm start
 
 - React
 - AWS Lambda
-- Amazon Bedrock (Claude)
+- Amazon Bedrock (Claude3 하이쿠 + 소넷)
