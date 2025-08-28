@@ -10,6 +10,7 @@ function App() {
   const [didimiEmotion, setDidimiEmotion] = useState('default');
   const [showTyping, setShowTyping] = useState(false);
   const chatEndRef = useRef(null);
+  const emotionTimeoutRef = useRef(null);  // setTimeout 관리용 ref 추가
 
   const scrollToBottom = () => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -26,69 +27,80 @@ function App() {
     }]);
   }, []);
 
+  // 디디미 감정 변경 함수
+  const changeDidimiEmotion = (emotion, duration = null) => {
+    // 기존 타이머 취소
+    if (emotionTimeoutRef.current) {
+      clearTimeout(emotionTimeoutRef.current);
+      emotionTimeoutRef.current = null;
+    }
+    
+    setDidimiEmotion(emotion);
+    
+    // duration이 있으면 그 시간 후 default로 복귀
+    if (duration) {
+      emotionTimeoutRef.current = setTimeout(() => {
+        setDidimiEmotion('default');
+        emotionTimeoutRef.current = null;
+      }, duration);
+    }
+  };
+
   const extractLinks = (text) => {
-  // URL 정규식 개선 - 한글이나 괄호 앞에서 끊기도록
-  const urlRegex = /(https?:\/\/[^\s\)]+)/g;
-  
-  // URL과 텍스트 분리를 더 명확히
-  const lines = text.split('\n');
-  const result = [];
-  
-  lines.forEach((line, lineIndex) => {
-    const matches = line.match(urlRegex);
+    const urlRegex = /(https?:\/\/[^\s\)]+)/g;
     
-    if (matches) {
-      // URL이 있는 줄은 URL 전후로 분리
-      let lastIndex = 0;
-      matches.forEach(url => {
-        const urlIndex = line.indexOf(url, lastIndex);
-        
-        // URL 앞 텍스트
-        if (urlIndex > lastIndex) {
-          result.push(<span key={`${lineIndex}-pre-${urlIndex}`}>{line.substring(lastIndex, urlIndex)}</span>);
-        }
-        
-        // URL을 깨끗하게 정리 (URL 인코딩 제거)
-        const cleanUrl = url.replace(/[)\]}>]$/, '').replace(/%[A-F0-9]{2}/g, '');
-        
-        let displayText = '🔗 바로가기';
-        if (cleanUrl.includes('ddm.go.kr')) {
-          displayText = '🔗 동대문구청 바로가기';
-        } else if (cleanUrl.includes('.hs.kr') || cleanUrl.includes('.ms.kr')) {
-          displayText = '🏫 학교 홈페이지';
-        }
-        
-        result.push(
-          <a key={`${lineIndex}-url-${urlIndex}`} 
-             href={cleanUrl} 
-             target="_blank" 
-             rel="noopener noreferrer" 
-             className="link-button">
-            {displayText}
-          </a>
-        );
-        
-        lastIndex = urlIndex + url.length;
-      });
+    const lines = text.split('\n');
+    const result = [];
+    
+    lines.forEach((line, lineIndex) => {
+      const matches = line.match(urlRegex);
       
-      // URL 뒤 텍스트
-      if (lastIndex < line.length) {
-        const remainingText = line.substring(lastIndex).replace(/%[A-F0-9]{2}/g, '');
-        result.push(<span key={`${lineIndex}-post`}>{remainingText}</span>);
+      if (matches) {
+        let lastIndex = 0;
+        matches.forEach(url => {
+          const urlIndex = line.indexOf(url, lastIndex);
+          
+          if (urlIndex > lastIndex) {
+            result.push(<span key={`${lineIndex}-pre-${urlIndex}`}>{line.substring(lastIndex, urlIndex)}</span>);
+          }
+          
+          const cleanUrl = url.replace(/[)\]}>]$/, '').replace(/%[A-F0-9]{2}/g, '');
+          
+          let displayText = '🔗 바로가기';
+          if (cleanUrl.includes('ddm.go.kr')) {
+            displayText = '🔗 동대문구청 바로가기';
+          } else if (cleanUrl.includes('.hs.kr') || cleanUrl.includes('.ms.kr')) {
+            displayText = '🏫 학교 홈페이지';
+          }
+          
+          result.push(
+            <a key={`${lineIndex}-url-${urlIndex}`} 
+               href={cleanUrl} 
+               target="_blank" 
+               rel="noopener noreferrer" 
+               className="link-button">
+              {displayText}
+            </a>
+          );
+          
+          lastIndex = urlIndex + url.length;
+        });
+        
+        if (lastIndex < line.length) {
+          const remainingText = line.substring(lastIndex).replace(/%[A-F0-9]{2}/g, '');
+          result.push(<span key={`${lineIndex}-post`}>{remainingText}</span>);
+        }
+      } else {
+        result.push(<span key={lineIndex}>{line}</span>);
       }
-    } else {
-      // URL이 없는 줄
-      result.push(<span key={lineIndex}>{line}</span>);
-    }
+      
+      if (lineIndex < lines.length - 1) {
+        result.push(<br key={`br-${lineIndex}`} />);
+      }
+    });
     
-    // 줄바꿈 추가
-    if (lineIndex < lines.length - 1) {
-      result.push(<br key={`br-${lineIndex}`} />);
-    }
-  });
-  
-  return result;
-};
+    return result;
+  };
 
   const handleQuickAction = (action) => {
     if (!loading) {
@@ -102,6 +114,15 @@ function App() {
     
     if (!messageToSend || loading) return;
 
+    // 연속 요청 방지
+    const now = Date.now();
+    const lastRequestTime = window.lastRequestTime || 0;
+    if (now - lastRequestTime < 1000) {
+      console.log("Too fast! Please wait a moment.");
+      return;
+    }
+    window.lastRequestTime = now;
+
     if (!quickMessage) {
       setInputText('');
     }
@@ -110,7 +131,7 @@ function App() {
     
     setLoading(true);
     setShowTyping(true);
-    setDidimiEmotion('thinking');
+    changeDidimiEmotion('thinking');  // 타이머 관리되는 함수 사용
 
     try {
       const response = await fetch(API_URL, {
@@ -121,12 +142,11 @@ function App() {
 
       const data = await response.json();
 
-      // 디버깅용 로그 추가
       console.log('Response data:', data);
       console.log('Success field:', data.success);
       
       setShowTyping(false);
-      setDidimiEmotion(data.success ? 'happy' : 'sorry');
+      changeDidimiEmotion(data.success ? 'happy' : 'sorry', 3000);  // 3초 후 default로
       
       setMessages(prev => [...prev, {
         type: 'bot',
@@ -134,17 +154,14 @@ function App() {
         hasLinks: data.answer?.includes('http')
       }]);
 
-      setTimeout(() => setDidimiEmotion('default'), 3000);
     } catch (error) {
       setShowTyping(false);
-      setDidimiEmotion('sorry');
+      changeDidimiEmotion('sorry', 3000);  // 3초 후 default로
       
       setMessages(prev => [...prev, {
         type: 'bot',
         text: '오류가 발생했어요. 잠시 후 다시 시도해주세요! 🙏'
       }]);
-      
-      setTimeout(() => setDidimiEmotion('default'), 3000);
     } finally {
       setLoading(false);
     }
@@ -162,7 +179,6 @@ function App() {
 
   const TypingIndicator = () => (
     <div className="message bot">
-      {/* <BotAvatar /> 삭제 */}
       <div className="typing-indicator">
         <div className="typing-dot"></div>
         <div className="typing-dot"></div>
@@ -170,6 +186,15 @@ function App() {
       </div>
     </div>
   );
+
+  // 컴포넌트 언마운트 시 타이머 정리
+  useEffect(() => {
+    return () => {
+      if (emotionTimeoutRef.current) {
+        clearTimeout(emotionTimeoutRef.current);
+      }
+    };
+  }, []);
 
   return (
     <div className="App">
@@ -190,7 +215,6 @@ function App() {
         </div>
       </header>
 
-      {/* Quick Actions */}
       <div className="quick-actions">
         <button 
           className="quick-action-btn" 
