@@ -46,12 +46,7 @@ body {
 .didimi-header {
   width: 100px;
   height: 100px;
-  /* background: white; 삭제 */
-  /* border-radius: 50%; 삭제 */
-  /* padding: 10px; 삭제 */
   object-fit: contain;
-  /* box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); 삭제 */
-  /* animation: float 3s ease-in-out infinite; 삭제 */
   transition: transform 0.3s ease;
 }
 
@@ -356,7 +351,6 @@ body {
   border-radius: 50%;
   padding: 20px;
   margin-bottom: 20px;
-  /* animation: float 3s ease-in-out infinite; 삭제 */
 }
 
 .empty-state h3 {
@@ -381,13 +375,10 @@ body {
   }
   
   .didimi-header {
-    width: 120px;  /* 100 → 120 */
-    height: 120px; /* 100 → 120 */
-    /* background: white; <- 삭제 */
-    /* border-radius: 50%; <- 삭제 */
-    padding: 0;  /* 10px → 0 */
+    width: 120px;
+    height: 120px;
     object-fit: contain;
-    filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.2)); /* box-shadow 대신 */
+    filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.2));
     transition: transform 0.3s ease;
   }
   
@@ -411,5 +402,4 @@ body {
     flex-direction: column;
     gap: 5px;
   }
-
 }
