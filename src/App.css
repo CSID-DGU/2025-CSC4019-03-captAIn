@@ -73,11 +73,31 @@ body {
   text-align: center;
 }
 
+/* ✨ [추가됨] 두둥실 떠다니는 애니메이션 */
+@keyframes floatAnimation {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
 .landing-logo {
-  width: 200px; /* ❗️[수정] 로고 너비를 100px에서 30px로 변경했습니다. */
-  height: 200px; /* ❗️[수정] 로고 높이를 100px에서 30px로 변경했습니다. */
+  width: 200px;
+  height: 200px;
   object-fit: contain;
   margin-bottom: 15px;
+  /* ✨ [수정됨] 그림자를 연하게 조정하고 애니메이션 적용 */
+  filter: drop-shadow(12px 12px 15px rgba(0, 0, 0, 0.15));
+  animation: floatAnimation 3s ease-in-out infinite;
+  transition: filter 0.3s ease-in-out; /* filter 효과만 transition 적용 */
+}
+
+/* ✨ [수정됨] 마우스 오버 시 그림자만 살짝 진해지도록 변경 */
+.landing-logo:hover {
+  filter: drop-shadow(12px 12px 15px rgba(0, 0, 0, 0.18));
 }
 
 .subtitle {
