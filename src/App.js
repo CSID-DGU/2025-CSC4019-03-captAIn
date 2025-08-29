@@ -4,7 +4,38 @@ import "./App.css";
 // API 엔드포인트
 const API_URL = process.env.REACT_APP_API_ENDPOINT || "YOUR_API_GATEWAY_URL";
 
+const SplashScreen = ({ onComplete }) => {
+  useEffect(() => {
+    // 3.2초 후 스플래시 화면을 숨깁니다.
+    const timer = setTimeout(() => {
+      onComplete();
+    }, 3200); // 3.2초 (3200ms) 동안 표시
+    return () => clearTimeout(timer);
+  }, [onComplete]);
+
+  return (
+    <div className="splash-screen">
+      <img
+        src="/images/didimi-found.png"
+        alt="디디온 파운드 로고"
+        className="splash-logo"
+      />
+      {/* 🌟 추가된 문구 */}
+      <h1 className="splash-title">DD-ON</h1>
+      <p className="splash-description">AI Education Policy Searching System</p>
+      <div className="loading-spinner"></div>
+      <p className="splash-text">
+        디디온이 여러분을 찾아가는 중입니다...
+        <br />
+        잠시만 기다려주세요!
+      </p>
+    </div>
+  );
+};
+
+
 function App() {
+  const [showSplash, setShowSplash] = useState(true);
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState("");
   const [loading, setLoading] = useState(false);
@@ -295,6 +326,10 @@ function App() {
   const isChatStarted = messages.length > 0;
 
   return (
+    <>
+    {showSplash ? (
+        <SplashScreen onComplete={() => setShowSplash(false)} />
+      ) : (
     <div className="App">
       <header className="app-header">
         <div className="header-left">
@@ -481,6 +516,8 @@ function App() {
 
       {isContactModalOpen && <ContactModal onClose={toggleContactModal} />}
     </div>
+    )}
+    </>
   );
 }
 

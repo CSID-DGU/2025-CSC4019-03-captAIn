@@ -675,3 +675,113 @@ body {
     display: none;
   }
 }
+
+/* --- 스플래시 화면 스타일 --- */
+.splash-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: #fff;
+  z-index: 9999;
+  animation: fadeOut 1s ease-out 3.2s forwards; 
+}
+
+.splash-logo {
+  width: 250px;
+  height: 250px;
+  object-fit: contain;
+  margin-bottom: 30px;
+  opacity: 0;
+  animation: fadeIn 1s ease-in-out forwards;
+}
+
+.splash-title {
+  font-size: 48px;
+  font-weight: 700;
+  color: #333;
+  opacity: 0;
+  animation: fadeIn 1s ease-in-out 0.8s forwards;
+  margin-bottom: 10px;
+}
+
+.splash-description {
+  font-size: 20px;
+  color: #666;
+  opacity: 0;
+  animation: fadeIn 0.8s ease-in-out 1.0s forwards;
+  margin-bottom: 30px;
+}
+
+.splash-text {
+  font-size: 18px;
+  color: #666;
+  text-align: center;
+  line-height: 1.5;
+  margin-top: 20px;
+  opacity: 0;
+  animation: fadeIn 1s ease-in-out 0.5s forwards;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #4a90e2;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* --- 메인 화면 진입 애니메이션 수정 --- */
+.App {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  opacity: 0;
+  /* 🌟 수직 이동을 제거하고 투명도 애니메이션만 적용 */
+  animation: fadeInOnly 1s ease-out 0.9s forwards; 
+}
+
+/* --- 애니메이션 키프레임 --- */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* 🌟 새로운 키프레임 정의: 투명도만 조절 */
+@keyframes fadeInOnly {
+  to {
+    opacity: 1;
+  }
+}
