@@ -50,6 +50,7 @@ function App() {
   const UserBubble = () => {
     const [gender, setGender] = useState(""); // 남/여 상태 추가
     const [schoolLevel, setSchoolLevel] = useState(""); // '초','중','고'
+    const [highDetail, setHighDetail] = useState(""); // '고' 선택 시 나타날 라디오 상태
     const [dong, setDong] = useState(""); // 선택한 동
     const dongs = [
       "장안1동", "장안2동", "답십리1동", "답십리2동", "이문1동", "이문2동", "휘경1동", "휘경2동", 
@@ -119,8 +120,45 @@ function App() {
           </label>
         </div>
 
-        
-
+        {/* '고'를 선택했을 때만 새로운 라디오 버튼 그룹 */}
+        {schoolLevel === "고" && (
+          <>
+          <div className="radio-group">
+            <p>계열</p>
+            <label>
+              <input
+                type="radio"
+                name="highDetail"
+                value="일반"
+                checked={highDetail === "일반"}
+                onChange={(e) => setHighDetail(e.target.value)}
+              />
+              일반
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="highDetail"
+                value="예체능"
+                checked={highDetail === "예체능"}
+                onChange={(e) => setHighDetail(e.target.value)}
+              />
+              예체능
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="highDetail"
+                value="실업계"
+                checked={highDetail === "실업계"}
+                onChange={(e) => setHighDetail(e.target.value)}
+              />
+              실업계
+            </label>
+          </div>
+          </>
+        )}
+            
         <p>거주 지역</p>
         <select
           value={dong}
