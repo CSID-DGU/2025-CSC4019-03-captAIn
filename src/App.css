@@ -561,3 +561,27 @@ body {
   resize: vertical;
   min-height: 100px;
 }
+
+/* --- 반응형 스타일 --- */
+@media (max-width: 768px) {
+  .app-header {
+    padding: 15px 20px;
+  }
+
+  .main-content {
+    padding: 0 20px 20px;
+  }
+
+  .title {
+    font-size: 32px;
+  }
+
+  .subtitle {
+    font-size: 16px;
+  }
+
+  /* 화면이 작아지면 문의하기 버튼 숨기기 */
+  .fab-contact {
+    display: none;
+  }
+}

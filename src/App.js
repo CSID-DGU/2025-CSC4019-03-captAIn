@@ -243,7 +243,10 @@ function App() {
                             onClick={() => handleFeedback(msg.id, "like")}
                             title="도움돼요"
                           >
-                            <img src="/images/like-button.png" alt="도움돼요" />
+                            <img
+                              src="/images/didimi-basic.png"
+                              alt="도움돼요"
+                            />
                           </button>
                           <button
                             className={`feedback-btn ${
