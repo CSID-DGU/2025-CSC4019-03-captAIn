@@ -9,6 +9,9 @@ function App() {
   const [inputText, setInputText] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // ✨ [추가됨] 문의 모달을 위한 상태
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+
   const chatEndRef = useRef(null);
 
   useEffect(() => {
@@ -90,6 +93,60 @@ function App() {
       return part;
     });
   };
+
+  // ✨ [추가됨] 문의 모달 관련 함수
+  const toggleContactModal = () => {
+    setIsContactModalOpen(!isContactModalOpen);
+  };
+
+  const handleConnectAgent = () => {
+    toggleContactModal();
+    setMessages((prev) => [
+      ...prev,
+      {
+        type: "bot",
+        text: "상담원 연결을 준비 중입니다. 잠시만 기다려주세요.\n(현재는 데모 기능입니다.)",
+      },
+    ]);
+  };
+
+  // ✨ [추가됨] 문의하기 모달 컴포넌트
+  const ContactModal = () => (
+    <div className="contact-modal-overlay" onClick={toggleContactModal}>
+      <div
+        className="contact-modal-content"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="modal-header">
+          <div className="modal-bot-icon">🤖</div>
+          <h3>DD-ON에 문의하기</h3>
+          <button className="modal-close-btn" onClick={toggleContactModal}>
+            ×
+          </button>
+        </div>
+        <div className="modal-body">
+          <p>
+            <strong>🚀 실시간 상담 안내</strong>
+          </p>
+          <p>전문 상담원과 연결하여 더 자세한 안내를 받으실 수 있습니다.</p>
+          <ul>
+            <li>
+              <strong>운영시간:</strong> 평일 09:00 ~ 18:00
+            </li>
+            <li>
+              <strong>점심시간:</strong> 12:00 ~ 13:00
+            </li>
+            <li>(주말 및 공휴일 휴무)</li>
+          </ul>
+        </div>
+        <div className="modal-footer">
+          <button className="modal-action-btn" onClick={handleConnectAgent}>
+            상담원 연결하기
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 
   const isChatStarted = messages.length > 0;
 
@@ -222,6 +279,13 @@ function App() {
           </div>
         </form>
       </main>
+
+      {/* ✨ [수정됨] 버튼 이미지의 width, height 속성을 제거했습니다. */}
+      <button className="fab-contact" onClick={toggleContactModal}>
+        <img src="/images/didimi-thinking.png" alt="문의하기" />
+      </button>
+
+      {isContactModalOpen && <ContactModal />}
     </div>
   );
 }
