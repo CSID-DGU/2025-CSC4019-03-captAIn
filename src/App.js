@@ -105,7 +105,10 @@ function App() {
 
         <div>
           <button
-            onClick={() => console.log("선택값:", schoolLevel)}
+            onClick={() => {
+              console.log("선택값:", schoolLevel, gender, dong);
+              setIsUserBubbleOpen(false); // 말풍선 닫기
+            }}
             className="submit-btn"
           >
             확인
