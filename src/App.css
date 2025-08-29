@@ -1,420 +1,310 @@
-/* 🎨 디디미 챗봇 UI 스타일링
- - 이 파일은 챗봇이 예쁘게 보이도록 꾸며주는 규칙들을 담고 있어요.
-*/
-
-:root {
-    /* 🌈 색깔 친구들 모음! */
-    --primary-color: #3c5ac2; /* 💙 진한 파랑색 (중요한 색) */
-    --primary-light: #5a78d2; /* 💧 조금 연한 파랑색 */
-    --secondary-color: #4ade80; /* 🌱 초록색 */
-    --text-color-dark: #2d3748; /* ⚫️ 아주 진한 글자색 */
-    --text-color-medium: #666; /* ⚪️ 보통 진한 글자색 */
-    --text-color-light: #999; /* 👻 연한 글자색 */
-    --bg-color-main: #ffffff; /* 🤍 깨끗한 흰색 배경 */
-    --bg-color-secondary: #f8f9fa; /* ☁️ 아주 연한 회색 */
-    --bg-color-glass: rgba(255, 255, 255, 0.95); /* 🧊 거의 불투명한 흰색 */
-    --bg-color-light: #ffffff; /* 🤍 흰색 */
-    --bg-color-message: #f0f4f8; /* 💬 말풍선용 연한 회색 */
-
-    /* 📏 간격 재는 자! */
-    --spacing-xs: 5px;
-    --spacing-sm: 10px;
-    --spacing-md: 20px;
-    --spacing-lg: 30px;
-
-    /* 💡 그림자 & 효과 모음! */
-    --shadow-light: 0 2px 5px rgba(0, 0, 0, 0.08);
-    --shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.1);
-    --shadow-heavy: 0 10px 25px rgba(0, 0, 0, 0.15);
-    --shadow-button: 0 4px 15px rgba(60, 90, 194, 0.25);
-
-    /* 🍩 테두리를 둥글게! */
-    --radius-small: 4px;
-    --radius-medium: 20px;
-    --radius-large: 25px;
-    --radius-full: 50%;
-}
-
+/* 기본 스타일 초기화 */
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-    height: 100vh;
-    background: #f5f6fa; /* 아주 연한 회색 배경 */
-    overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background-color: #ffffff;
+  color: #333;
 }
 
+/* --- 전체 앱 레이아웃 --- */
 .App {
-    width: 100%;
-    height: 100vh;
-    margin: 0 auto;
-    background: var(--bg-color-main); /* 깨끗한 흰색 */
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    box-shadow: var(--shadow-light);
-    border-radius: 0;
-    overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
 }
 
-/* 🏷️ 헤더 */
+/* --- 상단 헤더 --- */
 .app-header {
-    background: #ffffff; /* 흰색 배경 */
-    padding: 15px var(--spacing-md);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-    border-bottom: 1px solid #e9ecef;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 40px;
+  border-bottom: 1px solid #f0f0f0;
+  flex-shrink: 0;
 }
 
-.header-left {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-md);
+.header-left,
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+.logo-text {
+  font-weight: bold;
+  font-size: 24px;
+}
+.nav-link {
+  text-decoration: none;
+  color: #555;
+  font-size: 15px;
+}
+.profile-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #eee;
 }
 
-.didimi-header {
-    width: 100px;
-    height: 100px;
-    object-fit: contain;
-    transition: transform 0.3s ease;
+/* --- 메인 콘텐츠 영역 --- */
+.main-content {
+  flex: 1;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  padding: 0 20px 20px 20px;
+  overflow: hidden;
+  justify-content: center; /* 콘텐츠를 수직 중앙에 정렬합니다. */
 }
 
-.didimi-header:hover {
-    transform: scale(1.05) rotate(5deg);
+/* --- 랜딩 페이지 UI (채팅 시작 전) --- */
+.landing-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 
-.header-left h1 {
-    color: var(--text-color-dark);
-    font-size: 24px;
-    font-weight: 700;
-    margin-bottom: var(--spacing-xs);
-    letter-spacing: -0.5px;
+.landing-logo {
+  width: 200px; /* ❗️[수정] 로고 너비를 100px에서 30px로 변경했습니다. */
+  height: 200px; /* ❗️[수정] 로고 높이를 100px에서 30px로 변경했습니다. */
+  object-fit: contain;
+  margin-bottom: 15px;
 }
 
-.header-left p {
-    color: var(--text-color-medium);
-    font-size: 14px;
+.subtitle {
+  font-size: 18px;
+  color: #666;
+  margin-bottom: 8px;
+}
+.title {
+  font-size: 48px;
+  font-weight: 700;
 }
 
-/* 🟢 상태 표시기 */
-.status-indicator {
-    position: absolute;
-    bottom: var(--spacing-sm);
-    right: var(--spacing-sm);
-    width: 12px;
-    height: 12px;
-    background: var(--secondary-color);
-    border-radius: var(--radius-full);
-    border: 2px solid #ffffff;
-    animation: pulse 2s infinite;
+/* 퀵 스타트 버튼 스타일 */
+.quick-start-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 40px;
+  flex-wrap: wrap;
 }
 
-@keyframes pulse {
-    0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7); }
-    70% { box-shadow: 0 0 0 10px rgba(74, 222, 128, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
+.quick-start-btn {
+  background-color: #f0f4f8;
+  border: none;
+  border-radius: 20px;
+  padding: 10px 20px;
+  font-size: 15px;
+  font-weight: 500;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
 }
 
-/* 🗂️ 빠른 실행 버튼들 */
-.quick-actions {
-    display: flex;
-    gap: var(--spacing-sm);
-    padding: 15px var(--spacing-md);
-    overflow-x: auto;
-    background: #f8f9fa; /* 아주 연한 회색 배경 */
-    border-bottom: 1px solid #e9ecef;
-    position: sticky;
-    top: 0;
-    z-index: 99;
+.quick-start-btn:hover {
+  background-color: #e0e8ef;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
 
-.quick-actions::-webkit-scrollbar {
-    height: 4px;
-}
-
-.quick-actions::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.05);
-}
-
-.quick-actions::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.1);
-    border-radius: 2px;
-}
-
-.quick-action-btn {
-    padding: 8px 16px;
-    background: #ffffff; /* 흰색 배경 */
-    border: 1px solid #dee2e6;
-    border-radius: var(--radius-medium);
-    color: var(--text-color-dark);
-    font-size: 13px;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
-}
-
-.quick-action-btn:hover {
-    background: var(--primary-color); /* 호버시 파란색 */
-    color: white;
-    border-color: var(--primary-color);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(60, 90, 194, 0.2);
-}
-
-/* 💬 채팅창 */
+/* --- 채팅 UI (채팅 시작 후) --- */
 .chat-container {
-    height: calc(100vh - 100px - 50px);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
+  flex: 1;
+  overflow-y: auto;
+  padding-top: 20px;
+  width: 100%;
+  max-width: 680px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-/* 📜 메시지들이 보이는 곳 */
 .messages {
-    flex: 1;
-    overflow-y: auto;
-    padding: var(--spacing-md);
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    background: #ffffff; /* 흰색 배경 */
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
-
-.messages::-webkit-scrollbar {
-    width: 6px;
-}
-
-.messages::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.messages::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.1);
-    border-radius: 3px;
-}
-
-/* 🫧 메시지 상자 */
 .message {
-    display: flex;
-    gap: var(--spacing-sm);
-    animation: slideIn 0.3s ease;
+  display: flex;
+  max-width: 85%;
 }
-
-@keyframes slideIn {
-    from { opacity: 0; transform: translateY(var(--spacing-md)); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
 .message.user {
-    justify-content: flex-end;
+  align-self: flex-end;
 }
-
 .message.bot {
-    justify-content: flex-start;
+  align-self: flex-start;
 }
-
 .message-bubble {
-    max-width: 75%;
-    padding: 15px var(--spacing-md);
-    font-size: 15px;
-    line-height: 1.5;
-    position: relative;
-    animation: pop 0.3s ease;
-    white-space: pre-wrap;
-    word-break: keep-all;
+  padding: 15px 20px;
+  border-radius: 20px;
+  font-size: 16px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: keep-all;
 }
 
-@keyframes pop {
-    0% { transform: scale(0.8); }
-    80% { transform: scale(1.05); }
-    100% { transform: scale(1); }
-}
-
+/* iMessage 스타일처럼 말풍선 색상을 변경했습니다. */
 .message.user .message-bubble {
-    background: var(--primary-color); /* 파란색 */
-    color: white;
-    border-radius: var(--radius-medium) var(--radius-medium) var(--radius-small) var(--radius-medium);
-    box-shadow: 0 3px 10px rgba(60, 90, 194, 0.2);
+  background-color: #007aff; /* iMessage 파란색 */
+  color: white;
+  border-bottom-right-radius: 5px;
 }
-
 .message.bot .message-bubble {
-    background: #e8eef5; /* 연한 회청색 - 대비 개선 */
-    color: var(--text-color-dark);
-    border-radius: var(--radius-medium) var(--radius-medium) var(--radius-medium) var(--radius-small);
-    border: 1px solid #d1dae3;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  background-color: #e5e5ea; /* iMessage 회색 */
+  color: #333;
+  border-bottom-left-radius: 5px;
 }
 
-/* ⏳ 타이핑 표시기 */
-.typing-indicator {
-    display: flex;
-    gap: 4px;
-    padding: var(--spacing-md);
-}
-
-.typing-dot {
-    width: 8px;
-    height: 8px;
-    background: var(--primary-color);
-    border-radius: var(--radius-full);
-    animation: typing 1.4s infinite;
-}
-
-.typing-dot:nth-child(2) {
-    animation-delay: 0.2s;
-}
-
-.typing-dot:nth-child(3) {
-    animation-delay: 0.4s;
-}
-
-@keyframes typing {
-    0%, 60%, 100% { transform: translateY(0); opacity: 0.6; }
-    30% { transform: translateY(-10px); opacity: 1; }
-}
-
-/* 🔗 링크 버튼 */
+/* 링크 버튼 스타일을 괄호 안에 들어갈 크기로 대폭 수정했습니다. */
 .link-button {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    margin-top: 10px;
-    padding: 8px 16px;
-    background: var(--primary-color);
-    color: white;
-    text-decoration: none;
-    border-radius: var(--radius-medium);
-    font-size: 13px;
-    font-weight: 500;
-    transition: all 0.3s ease;
-    box-shadow: var(--shadow-button);
+  display: inline-block;
+  padding: 2px 10px;
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+  text-decoration: none;
+  border-radius: 10px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  vertical-align: baseline;
+  margin: 0 3px;
+}
+
+/* AI 응답 말풍선 안의 링크 버튼만 초록색으로 변경 */
+.message.bot .link-button {
+  background-color: #34c759; /* iMessage 초록색 */
+  color: white;
 }
 
 .link-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(60, 90, 194, 0.4);
+  transform: scale(1.05);
 }
 
-/* ⌨️ 입력창 */
-.input-form {
-    padding: 10px var(--spacing-md);
-    background: #f8f9fa; /* 연한 회색 배경 */
-    border-top: 1px solid #dee2e6;
+.typing-indicator {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  padding: 15px 20px;
+}
+.typing-indicator div {
+  width: 8px;
+  height: 8px;
+  background-color: #adb5bd;
+  border-radius: 50%;
+  animation: typing-bounce 1.2s infinite ease-in-out;
+}
+.typing-indicator div:nth-child(2) {
+  animation-delay: -1s;
+}
+@keyframes typing-bounce {
+  0%,
+  80%,
+  100% {
+    transform: scale(0);
+  }
+  40% {
+    transform: scale(1);
+  }
 }
 
-.input-container {
-    display: flex;
-    gap: var(--spacing-sm);
-    background: #ffffff; /* 흰색 배경 */
-    border-radius: var(--radius-large);
-    padding: var(--spacing-xs);
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
-    border: 1px solid #dee2e6;
+.input-form-wrapper {
+  width: 100%;
+  padding-top: 20px;
+  flex-shrink: 0;
 }
-
-.input-form input {
-    flex: 1;
-    border: none;
-    padding: 8px var(--spacing-md);
-    font-size: 14px;
-    background: transparent;
-    outline: none;
+.input-form-container {
+  width: 100%;
+  padding: 15px;
+  border: 1px solid #e0e0e0;
+  border-radius: 20px;
+  background-color: #ffffff;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  transition: padding 0.3s ease-out;
 }
-
-.input-form input::placeholder {
-    color: rgba(0, 0, 0, 0.4);
+.input-form-wrapper.landing-mode .input-form-container {
+  padding: 15px 30px;
 }
-
-.input-form button {
-    width: 40px;
-    height: 40px;
-    border-radius: var(--radius-full);
-    border: none;
-    background: var(--primary-color);
-    color: white;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform 0.2s ease;
-    box-shadow: var(--shadow-button);
-    font-size: 16px;
+.form-header,
+.form-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
-
-.input-form button:hover:not(:disabled) {
-    transform: scale(1.1);
+.form-header {
+  margin-bottom: 15px;
 }
-
-.input-form button:active {
-    transform: scale(0.95);
+.form-footer {
+  margin-top: 15px;
 }
-
-.input-form button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    background: #adb5bd;
+.ai-badge {
+  font-size: 14px;
+  font-weight: 500;
 }
-
-/* 📱 반응형 디자인 */
-@media (max-width: 480px) {
-    .App {
-        max-width: 100%;
-        border-radius: 0;
-    }
-    .app-header h1 {
-        font-size: 24px;
-    }
-    .didimi-header {
-        width: 80px;
-        height: 80px;
-    }
-    .message-bubble {
-        max-width: 85%;
-        font-size: 14px;
-    }
+.beta-tag {
+  font-size: 10px;
+  color: #888;
 }
-
-/* 🎬 스플래시 화면 */
-.splash-screen {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100vh;
-    background-color: #ffffff; /* 흰색 배경 */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-    transition: opacity 0.5s ease-out;
-    opacity: 1;
+.char-counter {
+  font-size: 14px;
+  color: #888;
 }
-
-.splash-logo {
-    width: 250px;
-    height: auto;
-    object-fit: contain;
-    animation: splashPulse 1.5s infinite;
+.idea-textarea {
+  width: 100%;
+  border: none;
+  outline: none;
+  resize: none;
+  font-size: 16px;
+  line-height: 1.6;
+  background: transparent;
+  font-family: inherit;
+  max-height: 200px;
 }
-
-@keyframes splashPulse {
-    0% { transform: scale(1); opacity: 0.8; }
-    50% { transform: scale(1.05); opacity: 1; }
-    100% { transform: scale(1); opacity: 0.8; }
+.submit-button {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: none;
+  background-color: #333;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: background-color 0.2s;
 }
-
-.splash-screen.fade-out {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
+.submit-button:disabled {
+  background-color: #e0e0e0;
+  cursor: not-allowed;
+}
+.spinner {
+  border: 3px solid rgba(0, 0, 0, 0.2);
+  border-radius: 50%;
+  border-top-color: #333;
+  width: 18px;
+  height: 18px;
+  animation: spin 1s ease-in-out infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.input-form-wrapper.chat-mode .input-form-container {
+  display: flex;
+  align-items: center;
+  padding: 8px 8px 8px 20px;
+}
+.input-form-wrapper.chat-mode .form-footer {
+  margin-top: 0;
+  margin-left: 10px;
 }
