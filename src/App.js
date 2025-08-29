@@ -18,10 +18,11 @@ function App() {
   // 말풍선 컴포넌트
   const UserBubble = () => {
     const [schoolLevel, setSchoolLevel] = useState(""); // '초','중','고'
+    const [gender, setGender] = useState(""); // 남/여 상태 추가
     const [dong, setDong] = useState(""); // 선택한 동
     const dongs = [
-      "장안동", "답십리동", "이문동", "휘경동", "회기동", "청량리동",
-      "신설동", "제기동", "용두동", "전농동", "답십리1동", "장안1동"
+      "장안1동", "장안2동", "답십리1동", "답십리2동", "이문1동", "이문2동", "휘경1동", "휘경2동", 
+      "회기동", "청량리동", "제기동", "용신동", "전농1동", "전농2동"
     ];
     const handleSubmit = () => {
       console.log("학교급:", schoolLevel, "선택 동:", dong);
@@ -30,6 +31,7 @@ function App() {
 
     return (
       <div className="user-bubble">
+        <p>학교</p>
         <div className="radio-group">
           <label>
             <input
@@ -63,6 +65,31 @@ function App() {
           </label>
         </div>
 
+        <p>성별</p>
+        <div className="radio-group">
+          <label>
+            <input
+              type="radio"
+              name="gender"
+              value="male"
+              checked={gender === "male"}
+              onChange={(e) => setGender(e.target.value)}
+            />
+            남
+          </label>
+          <label>
+            <input
+              type="radio"
+              name="gender"
+              value="female"
+              checked={gender === "female"}
+              onChange={(e) => setGender(e.target.value)}
+            />
+            여
+          </label>
+        </div>
+
+        <p>거주 지역</p>
         <select
           value={dong}
           onChange={(e) => setDong(e.target.value)}

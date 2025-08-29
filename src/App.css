@@ -88,7 +88,12 @@ body {
   border-color: transparent transparent white transparent;
 }
 
-/* 라디오 그룹 */
+.user-bubble p {
+  font-weight: bold;
+  margin-bottom: 8px; /* 원하는 간격으로 조절 */
+}
+
+/* 초중고 그룹 */
 .user-bubble .radio-group {
   display: flex;
   justify-content: space-between;
@@ -102,6 +107,27 @@ body {
   gap: 5px;
   cursor: pointer;
 }
+
+/* 성별 라디오 그룹 */
+.user-bubble .gender-group {
+  display: flex;
+  justify-content: center;  /* 가운데 정렬 */
+  gap: 10px;                /* 버튼 간격 */
+  margin-bottom: 20px;
+  width: fit-content;  /* 버튼 폭만 차지 */
+  margin: 0 auto;
+  padding: 0 20px;              /* 각 버튼 좌우 여백 */
+}
+
+.user-bubble .gender-group label {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 0;
+  cursor: pointer;
+  width: auto;
+}
+
 
 /* 셀렉트박스 */
 .user-bubble .dong-select {
