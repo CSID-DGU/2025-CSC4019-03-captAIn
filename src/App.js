@@ -10,6 +10,84 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const chatEndRef = useRef(null);
+  const [isUserBubbleOpen, setIsUserBubbleOpen] = useState(false);
+  const toggleUserBubble = () => {
+    setIsUserBubbleOpen(!isUserBubbleOpen);
+  };
+
+  // 말풍선 컴포넌트
+  const UserBubble = () => {
+    const [schoolLevel, setSchoolLevel] = useState(""); // '초','중','고'
+    const [dong, setDong] = useState(""); // 선택한 동
+    const dongs = [
+      "장안동", "답십리동", "이문동", "휘경동", "회기동", "청량리동",
+      "신설동", "제기동", "용두동", "전농동", "답십리1동", "장안1동"
+    ];
+    const handleSubmit = () => {
+      console.log("학교급:", schoolLevel, "선택 동:", dong);
+      // 여기서 선택값을 서버로 보내거나 챗에 메시지로 추가 가능
+    };
+
+    return (
+      <div className="user-bubble">
+        <div className="radio-group">
+          <label>
+            <input
+              type="radio"
+              name="schoolLevel"
+              value="초"
+              checked={schoolLevel === "초"}
+              onChange={(e) => setSchoolLevel(e.target.value)}
+            />
+            초
+          </label>
+          <label>
+            <input
+              type="radio"
+              name="schoolLevel"
+              value="중"
+              checked={schoolLevel === "중"}
+              onChange={(e) => setSchoolLevel(e.target.value)}
+            />
+            중
+          </label>
+          <label>
+            <input
+              type="radio"
+              name="schoolLevel"
+              value="고"
+              checked={schoolLevel === "고"}
+              onChange={(e) => setSchoolLevel(e.target.value)}
+            />
+            고
+          </label>
+        </div>
+
+        <select
+          value={dong}
+          onChange={(e) => setDong(e.target.value)}
+          className="dong-select"
+        >
+          <option value="">거주 동</option>
+          {dongs.map((d) => (
+            <option key={d} value={d}>
+              {d}
+            </option>
+          ))}
+        </select>
+
+        <div>
+          <button
+            onClick={() => console.log("선택값:", schoolLevel)}
+            className="submit-btn"
+          >
+            확인
+          </button>
+        </div>
+      </div>
+    );
+  };
+
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -198,11 +276,15 @@ function App() {
             DD-ON
           </span>
         </div>
-        <div className="header-right">
-          <a href="#" className="nav-link">
-          <img src="/images/user_icon.png"  className="profile-icon" />
-          </a>     
 
+        <div className="header-right" style={{ position: "relative" }}>
+          <img
+            src="/images/user_icon.png"
+            className="profile-icon"
+            onClick={toggleUserBubble}
+            style={{ cursor: "pointer" }}
+          />
+          {isUserBubbleOpen && <UserBubble />}
         </div>
       </header>
 

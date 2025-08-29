@@ -64,6 +64,71 @@ body {
   justify-content: center; /* 콘텐츠를 수직 중앙에 정렬 */
 }
 
+.user-bubble {
+  position: absolute;
+  top: 70px; /* 아이콘 아래 */
+  right: 0;
+  background-color: white;
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+  width: 320px;
+  z-index: 200;
+  font-family: Arial, sans-serif;
+}
+
+/* 화살표 */
+.user-bubble::before {
+  content: "";
+  position: absolute;
+  top: -30px;
+  right: 10px; /* 아이콘 위치에 맞춤 */
+  border-width: 0 10px 30px 10px;
+  border-style: solid;
+  border-color: transparent transparent white transparent;
+}
+
+/* 라디오 그룹 */
+.user-bubble .radio-group {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.user-bubble .radio-group label {
+  display: flex;
+  padding: 0 30px; /* 좌우 여백 */
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+}
+
+/* 셀렉트박스 */
+.user-bubble .dong-select {
+  width: 100%;
+  padding: 5px;
+  margin-bottom: 20px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+/* 확인 버튼 */
+.user-bubble .submit-btn {
+  width: 100%;
+  padding: 7px 0;
+  border: none;
+  background-color: #4a90e2;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.user-bubble .submit-btn:hover {
+  background-color: #357ab8;
+}
+
 /* --- 랜딩 페이지 UI (채팅 시작 전) --- */
 .landing-container {
   display: flex;
