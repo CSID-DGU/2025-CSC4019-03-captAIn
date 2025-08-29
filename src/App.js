@@ -8,10 +8,7 @@ function App() {
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState("");
   const [loading, setLoading] = useState(false);
-
-  // ✨ [추가됨] 문의 모달을 위한 상태
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
-
   const chatEndRef = useRef(null);
 
   useEffect(() => {
@@ -25,7 +22,6 @@ function App() {
 
     setInputText("");
 
-    // ✨ [수정됨] 메시지에 고유 id 추가
     const newUserMessage = {
       id: Date.now(),
       type: "user",
@@ -37,25 +33,20 @@ function App() {
     setLoading(true);
 
     try {
-      // 실제 API 호출
       const response = await fetch(API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ question: messageToSend }),
       });
-
       const data = await response.json();
-
-      // ✨ [수정됨] 봇 메시지에 id와 feedback 상태 추가
       const newBotMessage = {
         id: Date.now() + 2,
         type: "bot",
         text:
           data.answer ||
           "죄송해요, 답변을 찾을 수 없었어요. 다른 질문을 해주세요!",
-        feedback: null, // 'like', 'dislike', or null
+        feedback: null,
       };
-
       setMessages((prev) => prev.slice(0, -1).concat(newBotMessage));
     } catch (error) {
       const errorMessage = {
@@ -70,12 +61,10 @@ function App() {
     }
   };
 
-  // ✨ [추가됨] 피드백 처리 함수
   const handleFeedback = (id, feedbackType) => {
     setMessages((prevMessages) =>
       prevMessages.map((msg) => {
         if (msg.id === id) {
-          // 이미 같은 피드백이 선택된 경우, 다시 누르면 취소
           if (msg.feedback === feedbackType) {
             return { ...msg, feedback: null };
           }
@@ -91,19 +80,16 @@ function App() {
     if (!text.match(urlRegex)) {
       return text;
     }
-
     const parts = text.split(urlRegex);
     return parts.map((part, index) => {
       if (part.match(urlRegex)) {
         const cleanUrl = part.replace(/[)\]}>]$/, "");
         let displayText = "🔗 바로가기";
-
         if (cleanUrl.includes("ddm.go.kr")) {
           displayText = "🔗 동대문구청 바로가기";
         } else if (cleanUrl.includes(".hs.kr") || cleanUrl.includes(".ms.kr")) {
           displayText = "🏫 학교 홈페이지";
         }
-
         return (
           <a
             key={index}
@@ -120,60 +106,83 @@ function App() {
     });
   };
 
-  // ✨ [추가됨] 문의 모달 관련 함수
   const toggleContactModal = () => {
     setIsContactModalOpen(!isContactModalOpen);
   };
 
-  const handleConnectAgent = () => {
-    toggleContactModal();
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: Date.now(),
-        type: "bot",
-        text: "상담원 연결을 준비 중입니다. 잠시만 기다려주세요.\n(현재는 데모 기능입니다.)",
-      },
-    ]);
-  };
+  // '메시지 보내기' 모달 컴포넌트
+  const ContactModal = ({ onClose }) => {
+    const [name, setName] = useState("");
+    const [email, setEmail] = useState("");
+    const [message, setMessage] = useState("");
 
-  // ✨ [추가됨] 문의하기 모달 컴포넌트
-  const ContactModal = () => (
-    <div className="contact-modal-overlay" onClick={toggleContactModal}>
-      <div
-        className="contact-modal-content"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="modal-header">
-          <div className="modal-bot-icon">🤖</div>
-          <h3>DD-ON에 문의하기</h3>
-          <button className="modal-close-btn" onClick={toggleContactModal}>
-            ×
-          </button>
-        </div>
-        <div className="modal-body">
-          <p>
-            <strong>🚀 실시간 상담 안내</strong>
-          </p>
-          <p>전문 상담원과 연결하여 더 자세한 안내를 받으실 수 있습니다.</p>
-          <ul>
-            <li>
-              <strong>운영시간:</strong> 평일 09:00 ~ 18:00
-            </li>
-            <li>
-              <strong>점심시간:</strong> 12:00 ~ 13:00
-            </li>
-            <li>(주말 및 공휴일 휴무)</li>
-          </ul>
-        </div>
-        <div className="modal-footer">
-          <button className="modal-action-btn" onClick={handleConnectAgent}>
-            상담원 연결하기
-          </button>
+    const handleMessageSubmit = (e) => {
+      e.preventDefault();
+      // 실제 앱에서는 이 데이터를 서버로 전송합니다.
+      console.log("메시지 전송:", { name, email, message });
+      // window.alert()는 이 환경에서 작동하지 않을 수 있으므로 alert 대신 console.log를 사용합니다.
+      console.log("메시지가 성공적으로 전송되었습니다!");
+      onClose(); // 모달 닫기
+    };
+
+    return (
+      <div className="contact-modal-overlay" onClick={onClose}>
+        <div
+          className="contact-modal-content"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="modal-header">
+            <h3>1:1 문의하기</h3>
+            <button className="modal-close-btn" onClick={onClose}>
+              ×
+            </button>
+          </div>
+          <div className="modal-body">
+            <form onSubmit={handleMessageSubmit} className="modal-form">
+              <div className="form-group">
+                <label htmlFor="name">이름</label>
+                <input
+                  type="text"
+                  id="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="이름을 입력해주세요"
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="email">이메일</label>
+                <input
+                  type="email"
+                  id="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="답변받으실 이메일을 입력해주세요"
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="message">메시지</label>
+                <textarea
+                  id="message"
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  placeholder="문의하실 내용을 자세히 적어주세요."
+                  rows="5"
+                  required
+                ></textarea>
+              </div>
+              <div className="modal-footer">
+                <button type="submit" className="modal-action-btn">
+                  보내기
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   const isChatStarted = messages.length > 0;
 
@@ -186,8 +195,7 @@ function App() {
             onClick={() => setMessages([])}
             style={{ cursor: "pointer" }}
           >
-            {" "}
-            DD-ON{" "}
+            DD-ON
           </span>
         </div>
         <div className="header-right">
@@ -356,7 +364,7 @@ function App() {
         <img src="/images/ddon_ask.png" alt="문의하기" />
       </button>
 
-      {isContactModalOpen && <ContactModal />}
+      {isContactModalOpen && <ContactModal onClose={toggleContactModal} />}
     </div>
   );
 }
