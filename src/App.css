@@ -212,7 +212,7 @@ body {
 
 .feedback-btn:hover {
   opacity: 1;
-  transform: scale(1.1);
+  transform: scale(1.4);
 }
 
 .feedback-btn.selected {
@@ -220,8 +220,8 @@ body {
 }
 
 .feedback-btn img {
-  width: 20px;
-  height: 20px;
+  width: 25px;
+  height: 25px;
   display: block;
 }
 
