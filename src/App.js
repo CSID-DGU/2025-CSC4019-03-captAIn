@@ -25,8 +25,13 @@ function App() {
 
     setInputText("");
 
-    const newUserMessage = { type: "user", text: messageToSend };
-    const typingMessage = { type: "bot", typing: true };
+    // ✨ [수정됨] 메시지에 고유 id 추가
+    const newUserMessage = {
+      id: Date.now(),
+      type: "user",
+      text: messageToSend,
+    };
+    const typingMessage = { id: Date.now() + 1, type: "bot", typing: true };
     setMessages((prev) => [...prev, newUserMessage, typingMessage]);
 
     setLoading(true);
@@ -41,23 +46,44 @@ function App() {
 
       const data = await response.json();
 
+      // ✨ [수정됨] 봇 메시지에 id와 feedback 상태 추가
       const newBotMessage = {
+        id: Date.now() + 2,
         type: "bot",
         text:
           data.answer ||
           "죄송해요, 답변을 찾을 수 없었어요. 다른 질문을 해주세요!",
+        feedback: null, // 'like', 'dislike', or null
       };
 
       setMessages((prev) => prev.slice(0, -1).concat(newBotMessage));
     } catch (error) {
       const errorMessage = {
+        id: Date.now() + 2,
         type: "bot",
         text: "오류가 발생했어요. 잠시 후 다시 시도해주세요!",
+        feedback: null,
       };
       setMessages((prev) => prev.slice(0, -1).concat(errorMessage));
     } finally {
       setLoading(false);
     }
+  };
+
+  // ✨ [추가됨] 피드백 처리 함수
+  const handleFeedback = (id, feedbackType) => {
+    setMessages((prevMessages) =>
+      prevMessages.map((msg) => {
+        if (msg.id === id) {
+          // 이미 같은 피드백이 선택된 경우, 다시 누르면 취소
+          if (msg.feedback === feedbackType) {
+            return { ...msg, feedback: null };
+          }
+          return { ...msg, feedback: feedbackType };
+        }
+        return msg;
+      })
+    );
   };
 
   const renderMessageContent = (text) => {
@@ -104,6 +130,7 @@ function App() {
     setMessages((prev) => [
       ...prev,
       {
+        id: Date.now(),
         type: "bot",
         text: "상담원 연결을 준비 중입니다. 잠시만 기다려주세요.\n(현재는 데모 기능입니다.)",
       },
@@ -154,7 +181,14 @@ function App() {
     <div className="App">
       <header className="app-header">
         <div className="header-left">
-          <span className="logo-text" onClick={() => setMessages([])} style={{ cursor: "pointer" }}> DD-ON  </span>
+          <span
+            className="logo-text"
+            onClick={() => setMessages([])}
+            style={{ cursor: "pointer" }}
+          >
+            {" "}
+            DD-ON{" "}
+          </span>
         </div>
         <div className="header-right">
           <a href="#" className="nav-link">
@@ -164,53 +198,67 @@ function App() {
         </div>
       </header>
 
-      <main
-        className="main-content"
-        style={{
-          flex: 1,
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          width: "100%",
-          maxWidth: "680px",
-          margin: "0 auto",
-          paddingTop: "20px",
-          overflowY: "auto",
-        }}
-      >
+      <main className="main-content">
         {isChatStarted ? (
-    <div
-      className="chat-container"
-      style={{
-        flex: 1,
-        width: "100%",
-        height: "100%",
-        backgroundImage: 'url("/images/didimi-basic.png")', // 채팅 시작 시 배경
-        backgroundSize: "50%",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-      }}
-    >
-      <div className="messages">
-        {messages.map((msg, index) => (
-          <div key={index} className={`message ${msg.type}`}>
-            {msg.typing ? (
-              <div className="typing-indicator">
-                <div></div>
-                <div></div>
-                <div></div>
-              </div>
-            ) : (
-              <div className="message-bubble">
-                {renderMessageContent(msg.text)}
-              </div>
-            )}
+          <div
+            className="chat-container"
+            style={{
+              flex: 1,
+              width: "100%",
+              height: "100%",
+              backgroundImage: 'url("/images/didimi-basic.png")',
+              backgroundSize: "50%",
+              backgroundPosition: "center",
+              backgroundRepeat: "no-repeat",
+            }}
+          >
+            <div className="messages">
+              {messages.map((msg) => (
+                <div key={msg.id} className={`message ${msg.type}`}>
+                  {msg.typing ? (
+                    <div className="typing-indicator">
+                      <div></div>
+                      <div></div>
+                      <div></div>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="message-bubble">
+                        {renderMessageContent(msg.text)}
+                      </div>
+                      {msg.type === "bot" && (
+                        <div className="feedback-buttons">
+                          <button
+                            className={`feedback-btn ${
+                              msg.feedback === "like" ? "selected" : ""
+                            }`}
+                            onClick={() => handleFeedback(msg.id, "like")}
+                            title="도움돼요"
+                          >
+                            <img src="/images/like-button.png" alt="도움돼요" />
+                          </button>
+                          <button
+                            className={`feedback-btn ${
+                              msg.feedback === "dislike" ? "selected" : ""
+                            }`}
+                            onClick={() => handleFeedback(msg.id, "dislike")}
+                            title="도움 안돼요"
+                          >
+                            <img
+                              src="/images/thumbs-down.png"
+                              alt="도움 안돼요"
+                            />
+                          </button>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              ))}
+              <div ref={chatEndRef} />
+            </div>
           </div>
-        ))}
-        <div ref={chatEndRef} />
-      </div>
-    </div>
-  ) : (
+        ) : (
           <div className="landing-container">
             <img
               src="/images/didimi-default.png"
@@ -304,7 +352,6 @@ function App() {
         </form>
       </main>
 
-      {/* ✨ [수정됨] 버튼 이미지의 width, height 속성을 제거했습니다. */}
       <button className="fab-contact" onClick={toggleContactModal}>
         <img src="/images/ddon_ask.png" alt="문의하기" />
       </button>

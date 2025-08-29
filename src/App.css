@@ -63,7 +63,6 @@ body {
   padding: 0 20px 20px 20px;
   overflow: hidden;
   justify-content: center; /* 콘텐츠를 수직 중앙에 정렬 */
-  
 }
 
 /* --- 랜딩 페이지 UI (채팅 시작 전) --- */
@@ -158,6 +157,9 @@ body {
 .message {
   display: flex;
   max-width: 85%;
+  /* ✨ [추가됨] 말풍선과 버튼을 하단에 정렬 */
+  align-items: flex-end;
+  gap: 8px;
 }
 .message.user {
   align-self: flex-end;
@@ -176,15 +178,51 @@ body {
 
 /* iMessage 스타일처럼 말풍선 색상을 변경했습니다. */
 .message.user .message-bubble {
-  background-color: rgba(0, 122, 255, 0.90); /* 0.8 = 80% 불투명, 0.5 = 50% 불투명 */
+  background-color: rgba(
+    0,
+    122,
+    255,
+    0.9
+  ); /* 0.8 = 80% 불투명, 0.5 = 50% 불투명 */
   color: white;
   border-bottom-right-radius: 5px;
 }
 
 .message.bot .message-bubble {
-  background-color: rgba(229, 229, 234, 0.90); /* 80% 불투명 */
+  background-color: rgba(229, 229, 234, 0.9); /* 80% 불투명 */
   color: #333;
   border-bottom-left-radius: 5px;
+}
+
+/* ✨ [추가됨] 피드백 버튼 스타일 */
+.feedback-buttons {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 5px;
+}
+
+.feedback-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  opacity: 0.4;
+  transition: all 0.2s ease;
+}
+
+.feedback-btn:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.feedback-btn.selected {
+  opacity: 1;
+}
+
+.feedback-btn img {
+  width: 20px;
+  height: 20px;
+  display: block;
 }
 
 /* 링크 버튼 스타일을 괄호 안에 들어갈 크기로 대폭 수정했습니다. */
