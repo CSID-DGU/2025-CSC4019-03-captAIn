@@ -25,7 +25,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 40px;
+  padding: 15px 50px;
   border-bottom: 3px solid #f0f0f0;
   flex-shrink: 0;
 }
@@ -40,15 +40,20 @@ body {
   font-weight: bold;
   font-size: 40px;
 }
+.logo-text .highlight {
+  color: red; 
+}
 .nav-link {
   text-decoration: none;
   color: #ffffff;
   font-size: 15px;
 }
 .profile-icon {
-  width: 43px;
-  height: 43px;
-  background-color: #ffffff;
+  width: 45px;       /* 아이콘 크기 */
+  height: 45px;
+  border-radius: 50%;
+  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4));
+  transition: transform 0.2s ease; /* 호버할 때 살짝 커지게 */
 }
 
 /* --- 메인 콘텐츠 영역 --- */

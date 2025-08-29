@@ -96,7 +96,7 @@ function App() {
               checked={schoolLevel === "초"}
               onChange={(e) => setSchoolLevel(e.target.value)}
             />
-            초
+            초등학생
           </label>
           <label>
             <input
@@ -106,7 +106,7 @@ function App() {
               checked={schoolLevel === "중"}
               onChange={(e) => setSchoolLevel(e.target.value)}
             />
-            중
+            중학생
           </label>
           <label>
             <input
@@ -116,7 +116,7 @@ function App() {
               checked={schoolLevel === "고"}
               onChange={(e) => setSchoolLevel(e.target.value)}
             />
-            고
+            고등학생
           </label>
         </div>
 
@@ -377,7 +377,7 @@ function App() {
             onClick={() => setMessages([])}
             style={{ cursor: "pointer" }}
           >
-            DD-ON
+            DD-<span className="highlight">O</span>N
           </span>
         </div>
 
@@ -463,7 +463,7 @@ function App() {
               className="landing-logo"
             />
             <div className="text-container">
-              <p className="subtitle">꿈꾸던 모든 것, 디디온과 함께</p>
+              <p className="subtitle">디디온과 함께하는 동대문 교육 탐방</p>
               <h1 className="title">디디온에게 물어보세요</h1>
             </div>
             <div className="quick-start-buttons">
