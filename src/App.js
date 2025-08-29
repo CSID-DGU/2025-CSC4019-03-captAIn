@@ -97,7 +97,7 @@ function App() {
     <div className="App">
       <header className="app-header">
         <div className="header-left">
-          <span className="logo-text">DD-ON</span>
+          <span className="logo-text" onClick={() => setMessages([])} style={{ cursor: "pointer" }}> DD-ON  </span>
         </div>
         <div className="header-right">
           <a href="#" className="nav-link">
