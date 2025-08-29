@@ -202,6 +202,7 @@ function App() {
           <a href="#" className="nav-link">
           <img src="/images/user_icon.png"  className="profile-icon" />
           </a>     
+
         </div>
       </header>
 
@@ -243,7 +244,7 @@ function App() {
                             title="도움돼요"
                           >
                             <img
-                              src="/images/didimi-basic.png"
+                              src="/images/like-button.png"
                               alt="도움돼요"
                             />
                           </button>
