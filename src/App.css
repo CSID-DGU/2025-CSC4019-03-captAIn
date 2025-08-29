@@ -314,8 +314,8 @@ body {
   position: fixed;
   bottom: 30px;
   right: 30px;
-  width: 60px;
-  height: 60px;
+  width: 80px;
+  height: 80px;
   background-color: transparent;
   /* ✨ [수정됨] 원형 효과를 제거했습니다. */
   border-radius: 0;

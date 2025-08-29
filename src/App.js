@@ -282,7 +282,7 @@ function App() {
 
       {/* ✨ [수정됨] 버튼 이미지의 width, height 속성을 제거했습니다. */}
       <button className="fab-contact" onClick={toggleContactModal}>
-        <img src="/images/didimi-thinking.png" alt="문의하기" />
+        <img src="/images/ddon_ask.png" alt="문의하기" />
       </button>
 
       {isContactModalOpen && <ContactModal />}
