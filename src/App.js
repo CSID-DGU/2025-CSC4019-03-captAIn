@@ -200,9 +200,8 @@ function App() {
         </div>
         <div className="header-right">
           <a href="#" className="nav-link">
-            내사이트
-          </a>
-          <div className="profile-icon" />
+          <img src="/images/user_icon.png"  className="profile-icon" />
+          </a>     
         </div>
       </header>
 
