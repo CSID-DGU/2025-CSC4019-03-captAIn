@@ -62,7 +62,8 @@ body {
   flex-direction: column;
   padding: 0 20px 20px 20px;
   overflow: hidden;
-  justify-content: center; /* 콘텐츠를 수직 중앙에 정렬합니다. */
+  justify-content: center; /* 콘텐츠를 수직 중앙에 정렬 */
+  
 }
 
 /* --- 랜딩 페이지 UI (채팅 시작 전) --- */
@@ -146,6 +147,7 @@ body {
   max-width: 680px;
   margin-left: auto;
   margin-right: auto;
+  background: transparent;
 }
 
 .messages {
@@ -174,12 +176,13 @@ body {
 
 /* iMessage 스타일처럼 말풍선 색상을 변경했습니다. */
 .message.user .message-bubble {
-  background-color: #007aff; /* iMessage 파란색 */
+  background-color: rgba(0, 122, 255, 0.90); /* 0.8 = 80% 불투명, 0.5 = 50% 불투명 */
   color: white;
   border-bottom-right-radius: 5px;
 }
+
 .message.bot .message-bubble {
-  background-color: #e5e5ea; /* iMessage 회색 */
+  background-color: rgba(229, 229, 234, 0.90); /* 80% 불투명 */
   color: #333;
   border-bottom-left-radius: 5px;
 }

@@ -164,29 +164,53 @@ function App() {
         </div>
       </header>
 
-      <main className="main-content">
+      <main
+        className="main-content"
+        style={{
+          flex: 1,
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          width: "100%",
+          maxWidth: "680px",
+          margin: "0 auto",
+          paddingTop: "20px",
+          overflowY: "auto",
+        }}
+      >
         {isChatStarted ? (
-          <div className="chat-container">
-            <div className="messages">
-              {messages.map((msg, index) => (
-                <div key={index} className={`message ${msg.type}`}>
-                  {msg.typing ? (
-                    <div className="typing-indicator">
-                      <div></div>
-                      <div></div>
-                      <div></div>
-                    </div>
-                  ) : (
-                    <div className="message-bubble">
-                      {renderMessageContent(msg.text)}
-                    </div>
-                  )}
-                </div>
-              ))}
-              <div ref={chatEndRef} />
-            </div>
+    <div
+      className="chat-container"
+      style={{
+        flex: 1,
+        width: "100%",
+        height: "100%",
+        backgroundImage: 'url("/images/didimi-basic.png")', // 채팅 시작 시 배경
+        backgroundSize: "50%",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+      }}
+    >
+      <div className="messages">
+        {messages.map((msg, index) => (
+          <div key={index} className={`message ${msg.type}`}>
+            {msg.typing ? (
+              <div className="typing-indicator">
+                <div></div>
+                <div></div>
+                <div></div>
+              </div>
+            ) : (
+              <div className="message-bubble">
+                {renderMessageContent(msg.text)}
+              </div>
+            )}
           </div>
-        ) : (
+        ))}
+        <div ref={chatEndRef} />
+      </div>
+    </div>
+  ) : (
           <div className="landing-container">
             <img
               src="/images/didimi-default.png"
@@ -205,7 +229,7 @@ function App() {
                 #독서실
               </button>
               <button
-                onClick={() => handleSubmit(null, "동대문구 고등학생 목록")}
+                onClick={() => handleSubmit(null, "동대문구 고등학교 목록")}
                 className="quick-start-btn"
               >
                 #학교 정보
