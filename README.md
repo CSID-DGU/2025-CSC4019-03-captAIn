@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 동문서답 (동대문구 교육정보 챗봇)
 
 ## 프로젝트 설명
@@ -19,3 +20,8 @@ npm start
 - React
 - AWS Lambda
 - Amazon Bedrock (Claude3 하이쿠 + 소넷)
+=======
+# 2025-CSC4019-03-captAIn
+팀장 : 서동건
+팀원 : 이예림, 이준원
+>>>>>>> origin/main
