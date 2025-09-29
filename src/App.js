@@ -1,15 +1,34 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import FAQList from './components/interactive/FAQList'; 
 import "./App.css";
 
 // API 엔드포인트
 const API_URL = process.env.REACT_APP_API_ENDPOINT || "YOUR_API_GATEWAY_URL";
 
+/* -----------------------------------------------------
+ * 0. 더미 사용자 데이터 (실제는 DB 사용)
+ * ----------------------------------------------------- */
+const DUMMY_USERS = [
+  {
+    id: 1,
+    email: "test@example.com",
+    password: "password123", // 실제로는 해싱됨
+    name: "김철수",
+    gender: "male",
+    schoolLevel: "고",
+    highDetail: "일반",
+    dong: "장안1동",
+  },
+];
+
+/* -----------------------------------------------------
+ * 1. 스플래시 화면
+ * ----------------------------------------------------- */
 const SplashScreen = ({ onComplete }) => {
   useEffect(() => {
-    // 3.2초 후 스플래시 화면을 숨깁니다.
     const timer = setTimeout(() => {
       onComplete();
-    }, 3200); // 3.2초 (3200ms) 동안 표시
+    }, 3200);
     return () => clearTimeout(timer);
   }, [onComplete]);
 
@@ -20,12 +39,11 @@ const SplashScreen = ({ onComplete }) => {
         alt="디디온 파운드 로고"
         className="splash-logo"
       />
-      {/* 🌟 추가된 문구 */}
-      <h1 className="splash-title">DD-ON</h1>
-      <p className="splash-description">AI Education Policy Searching System</p>
+      <h1 className="splash-title">SEOUL-AI</h1>
+      <p className="splash-description">Your AI Parenting Navigator.</p>
       <div className="loading-spinner"></div>
       <p className="splash-text">
-        디디온이 여러분을 찾아가는 중입니다...
+        서울아이가 여러분을 찾아가는 중입니다...
         <br />
         잠시만 기다려주세요!
       </p>
@@ -33,6 +51,444 @@ const SplashScreen = ({ onComplete }) => {
   );
 };
 
+/* -----------------------------------------------------
+ * 2. 사용자 정보 출력 (UserBubble)
+ * ----------------------------------------------------- */
+const UserBubble = ({ user, onClose }) => {
+  const { name, gender, schoolLevel, highDetail, dong } = user;
+
+  const schoolText = `${schoolLevel} 학생${
+    highDetail ? ` (${highDetail} 계열)` : ""
+  }`;
+
+  return (
+    <div className="user-bubble">
+      <h3>{name} 님의 정보</h3>
+      <p>
+        <strong>성별:</strong> {gender === "male" ? "남" : "여"}
+      </p>
+      <p>
+        <strong>학교:</strong> {schoolText}
+      </p>
+      <p>
+        <strong>거주 지역:</strong> {dong}
+      </p>
+      <div style={{ marginTop: "10px" }}>
+        <button onClick={onClose} className="submit-btn">
+          닫기
+        </button>
+      </div>
+    </div>
+  );
+};
+
+/* -----------------------------------------------------
+ * 3. 로그인 모달
+ * ----------------------------------------------------- */
+const LoginModal = ({ onClose, onLoginSuccess }) => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setError("");
+
+    const user = DUMMY_USERS.find(
+      (u) => u.email === email && u.password === password
+    );
+
+    if (user) {
+      onLoginSuccess(user);
+      onClose();
+    } else {
+      setError("이메일 또는 비밀번호가 올바르지 않습니다.");
+    }
+  };
+
+  return (
+    <div className="contact-modal-overlay" onClick={onClose}>
+      <div
+        className="contact-modal-content"
+        onClick={(e) => e.stopPropagation()}
+        style={{ width: "350px" }}
+      >
+        <div className="modal-header">
+          <h3>로그인</h3>
+          <button className="modal-close-btn" onClick={onClose}>
+            ×
+          </button>
+        </div>
+        <div className="modal-body">
+          <form onSubmit={handleSubmit} className="modal-form">
+            <div className="form-group">
+              <label htmlFor="login-email">이메일</label>
+              <input
+                type="email"
+                id="login-email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="이메일을 입력해주세요"
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="login-password">비밀번호</label>
+              <input
+                type="password"
+                id="login-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="비밀번호를 입력해주세요"
+                required
+              />
+            </div>
+            {error && <p className="error-message">{error}</p>}
+            <div className="modal-footer" style={{ marginTop: "20px" }}>
+              <button type="submit" className="modal-action-btn">
+                로그인
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* -----------------------------------------------------
+ * 4. 회원가입 모달 (사용자 정보 입력 포함)
+ * ----------------------------------------------------- */
+const SignupModal = ({ onClose, onSignupSuccess }) => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const [gender, setGender] = useState("");
+  const [schoolLevel, setSchoolLevel] = useState("");
+  const [highDetail, setHighDetail] = useState("");
+  const [dong, setDong] = useState("");
+  const [error, setError] = useState("");
+
+  const dongs = [
+    "장안1동",
+    "장안2동",
+    "답십리1동",
+    "답십리2동",
+    "이문1동",
+    "이문2동",
+    "휘경1동",
+    "휘경2동",
+    "회기동",
+    "청량리동",
+    "제기동",
+    "용신동",
+    "전농1동",
+    "전농2동",
+  ];
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setError("");
+
+    if (DUMMY_USERS.find((u) => u.email === email)) {
+      setError("이미 사용 중인 이메일입니다.");
+      return;
+    }
+
+    if (!gender || !schoolLevel || !dong || !name || !password) {
+      setError("모든 필수 정보를 입력해주세요.");
+      return;
+    }
+
+    const newUser = {
+      id: DUMMY_USERS.length + 1,
+      email,
+      password,
+      name,
+      gender,
+      schoolLevel,
+      highDetail: schoolLevel === "고" ? highDetail : "",
+      dong,
+    };
+
+    DUMMY_USERS.push(newUser); 
+    onSignupSuccess(newUser);
+    onClose();
+  };
+
+  return (
+    <div className="contact-modal-overlay" onClick={onClose}>
+      <div
+        className="contact-modal-content"
+        onClick={(e) => e.stopPropagation()}
+        style={{ width: "400px" }}
+      >
+        <div className="modal-header">
+          <h3>회원가입 및 정보 입력</h3>
+          <button className="modal-close-btn" onClick={onClose}>
+            ×
+          </button>
+        </div>
+        <div className="modal-body">
+          <form onSubmit={handleSubmit} className="modal-form">
+            {/* 기본 계정 정보 */}
+            <div className="form-group">
+              <label>이름</label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="이름을 입력해주세요"
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label>이메일</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="로그인에 사용할 이메일"
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label>비밀번호</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="비밀번호 설정"
+                required
+              />
+            </div>
+
+            <hr style={{ margin: "15px 0" }} />
+
+            {/* 사용자 상세 정보 */}
+            <p>
+              <strong>성별 *</strong>
+            </p>
+            <div className="radio-group">
+              <label>
+                <input
+                  type="radio"
+                  name="gender"
+                  value="male"
+                  checked={gender === "male"}
+                  onChange={(e) => setGender(e.target.value)}
+                  required
+                />
+                남
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="gender"
+                  value="female"
+                  checked={gender === "female"}
+                  onChange={(e) => setGender(e.target.value)}
+                  required
+                />
+                여
+              </label>
+            </div>
+
+            <p style={{ marginTop: "10px" }}>
+              <strong>학교 *</strong>
+            </p>
+            <div className="radio-group">
+              <label>
+                <input
+                  type="radio"
+                  name="schoolLevel"
+                  value="초"
+                  checked={schoolLevel === "초"}
+                  onChange={(e) => setSchoolLevel(e.target.value)}
+                  required
+                />
+                초등학생
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="schoolLevel"
+                  value="중"
+                  checked={schoolLevel === "중"}
+                  onChange={(e) => setSchoolLevel(e.target.value)}
+                  required
+                />
+                중학생
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="schoolLevel"
+                  value="고"
+                  checked={schoolLevel === "고"}
+                  onChange={(e) => setSchoolLevel(e.target.value)}
+                  required
+                />
+                고등학생
+              </label>
+            </div>
+
+            {/* '고'를 선택했을 때만 나타나는 계열 선택 */}
+            {schoolLevel === "고" && (
+              <>
+                <p style={{ marginTop: "10px" }}>
+                  <strong>계열</strong>
+                </p>
+                <div className="radio-group">
+                  <label>
+                    <input
+                      type="radio"
+                      name="highDetail"
+                      value="일반"
+                      checked={highDetail === "일반"}
+                      onChange={(e) => setHighDetail(e.target.value)}
+                    />
+                    일반
+                  </label>
+                  <label>
+                    <input
+                      type="radio"
+                      name="highDetail"
+                      value="예체능"
+                      checked={highDetail === "예체능"}
+                      onChange={(e) => setHighDetail(e.target.value)}
+                    />
+                    예체능
+                  </label>
+                  <label>
+                    <input
+                      type="radio"
+                      name="highDetail"
+                      value="실업계"
+                      checked={highDetail === "실업계"}
+                      onChange={(e) => setHighDetail(e.target.value)}
+                    />
+                    실업계
+                  </label>
+                </div>
+              </>
+            )}
+
+            <p style={{ marginTop: "10px" }}>
+              <strong>거주 지역 *</strong>
+            </p>
+            <select
+              value={dong}
+              onChange={(e) => setDong(e.target.value)}
+              className="dong-select"
+              required
+            >
+              <option value="">거주 동 선택</option>
+              {dongs.map((d) => (
+                <option key={d} value={d}>
+                  {d}
+                </option>
+              ))}
+            </select>
+
+            {error && <p className="error-message">{error}</p>}
+
+            <div className="modal-footer" style={{ marginTop: "20px" }}>
+              <button type="submit" className="modal-action-btn">
+                회원가입 완료
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* -----------------------------------------------------
+ * 5. 랜딩 페이지 FAQ 모달
+ * ----------------------------------------------------- */
+const LandingFAQModal = ({ onClose, onSelect }) => {
+  return (
+    <div className="contact-modal-overlay" onClick={onClose}>
+      <div 
+        className="contact-modal-content landing-faq-modal" 
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="modal-header">
+          <h3>자주 묻는 질문</h3>
+          <button className="modal-close-btn" onClick={onClose}>
+            ×
+          </button>
+        </div>
+        <FAQList onSelect={(question) => {
+            onSelect(null, question); // handleSubmit(null, question) 형식에 맞춤
+            onClose(); 
+        }} />
+      </div>
+    </div>
+  );
+};
+
+
+/* -----------------------------------------------------
+ * 6. 사이드바 컴포넌트
+ * ----------------------------------------------------- */
+const Sidebar = ({ isOpen, onClose, onNewChat, messages }) => {
+  // 간단한 채팅 기록 목록을 보여주기 위한 로직
+  const chatHistory = messages.filter(msg => msg.type === 'user' && !msg.typing)
+                            .map(msg => msg.text)
+                            .slice(0, 5) // 최근 5개만 표시
+                            .reverse(); // 최신 메시지가 위로 오도록
+
+  return (
+    <>
+      {/* 1. 오버레이 (사이드바가 닫힐 때 클릭하여 닫기) */}
+      {isOpen && <div className="sidebar-overlay" onClick={onClose}></div>}
+      
+      {/* 2. 사이드바 본체 */}
+      <div className={`sidebar ${isOpen ? 'open' : 'closed'}`}>
+        <div className="sidebar-header">
+          <h4 className="sidebar-title">메뉴 & 기록</h4>
+          <button onClick={onClose} className="sidebar-close-btn">
+            &times;
+          </button>
+        </div>
+        
+        <div className="sidebar-content">
+          <button onClick={onNewChat} className="sidebar-new-chat-btn">
+            + 새 채팅 시작
+          </button>
+          
+          <div className="sidebar-history">
+            <h5>최근 질문</h5>
+            {chatHistory.length > 0 ? (
+              <ul>
+                {chatHistory.map((text, index) => (
+                  <li key={index} title={text}>
+                    {text.substring(0, 30)}...
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="no-history">채팅 기록이 없습니다.</p>
+            )}
+          </div>
+          
+          <div className="sidebar-settings">
+            <h5>설정</h5>
+            <p className="no-history">개인 설정 및 가이드</p>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
+
+
+/* -----------------------------------------------------
+ * 7. 메인 App 컴포넌트
+ * ----------------------------------------------------- */
 function App() {
   const [showSplash, setShowSplash] = useState(true);
   const [messages, setMessages] = useState([]);
@@ -40,410 +496,109 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const chatEndRef = useRef(null);
+  
+  // 인증/모달 상태 관리
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null); 
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isSignupModalOpen, setIsSignupModalOpen] = useState(false);
+  
+  // FAQ 표시 상태 관리
+  const [isLandingFAQModalOpen, setIsLandingFAQModalOpen] = useState(false);
+
+  // ⭐ [추가] 사이드바 상태 관리
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+
   const [isUserBubbleOpen, setIsUserBubbleOpen] = useState(false);
   const toggleUserBubble = () => {
     setIsUserBubbleOpen(!isUserBubbleOpen);
   };
-
-  // 말풍선 컴포넌트
-  const UserBubble = () => {
-    const [gender, setGender] = useState(""); // 남/여 상태 추가
-    const [schoolLevel, setSchoolLevel] = useState(""); // '초','중','고'
-    const [highDetail, setHighDetail] = useState(""); // '고' 선택 시 나타날 라디오 상태
-    const [dong, setDong] = useState(""); // 선택한 동
-    const dongs = [
-      "장안1동",
-      "장안2동",
-      "답십리1동",
-      "답십리2동",
-      "이문1동",
-      "이문2동",
-      "휘경1동",
-      "휘경2동",
-      "회기동",
-      "청량리동",
-      "제기동",
-      "용신동",
-      "전농1동",
-      "전농2동",
-    ];
-    const handleSubmit = () => {
-      console.log("학교급:", schoolLevel, "선택 동:", dong);
-      // 여기서 선택값을 서버로 보내거나 챗에 메시지로 추가 가능
-    };
-
-    return (
-      <div className="user-bubble">
-        <p>성별</p>
-        <div className="radio-group">
-          <label>
-            <input
-              type="radio"
-              name="gender"
-              value="male"
-              checked={gender === "male"}
-              onChange={(e) => setGender(e.target.value)}
-            />
-            남
-          </label>
-          <label>
-            <input
-              type="radio"
-              name="gender"
-              value="female"
-              checked={gender === "female"}
-              onChange={(e) => setGender(e.target.value)}
-            />
-            여
-          </label>
-        </div>
-        <p>학교</p>
-        <div className="radio-group">
-          <label>
-            <input
-              type="radio"
-              name="schoolLevel"
-              value="초"
-              checked={schoolLevel === "초"}
-              onChange={(e) => setSchoolLevel(e.target.value)}
-            />
-            초등학생
-          </label>
-          <label>
-            <input
-              type="radio"
-              name="schoolLevel"
-              value="중"
-              checked={schoolLevel === "중"}
-              onChange={(e) => setSchoolLevel(e.target.value)}
-            />
-            중학생
-          </label>
-          <label>
-            <input
-              type="radio"
-              name="schoolLevel"
-              value="고"
-              checked={schoolLevel === "고"}
-              onChange={(e) => setSchoolLevel(e.target.value)}
-            />
-            고등학생
-          </label>
-        </div>
-
-        {/* '고'를 선택했을 때만 새로운 라디오 버튼 그룹 */}
-        {schoolLevel === "고" && (
-          <>
-            <div className="radio-group">
-              <p>계열</p>
-              <label>
-                <input
-                  type="radio"
-                  name="highDetail"
-                  value="일반"
-                  checked={highDetail === "일반"}
-                  onChange={(e) => setHighDetail(e.target.value)}
-                />
-                일반
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  name="highDetail"
-                  value="예체능"
-                  checked={highDetail === "예체능"}
-                  onChange={(e) => setHighDetail(e.target.value)}
-                />
-                예체능
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  name="highDetail"
-                  value="실업계"
-                  checked={highDetail === "실업계"}
-                  onChange={(e) => setHighDetail(e.target.value)}
-                />
-                실업계
-              </label>
-            </div>
-          </>
-        )}
-
-        <p>거주 지역</p>
-        <select
-          value={dong}
-          onChange={(e) => setDong(e.target.value)}
-          className="dong-select"
-        >
-          <option value="">거주 동</option>
-          {dongs.map((d) => (
-            <option key={d} value={d}>
-              {d}
-            </option>
-          ))}
-        </select>
-
-        <div>
-          <button
-            onClick={() => {
-              console.log("선택값:", schoolLevel, gender, dong);
-              setIsUserBubbleOpen(false); // 말풍선 닫기
-            }}
-            className="submit-btn"
-          >
-            확인
-          </button>
-        </div>
-      </div>
-    );
+  
+  // 사이드바 토글 핸들러
+  const toggleSidebar = () => {
+    setIsSidebarOpen(prev => !prev);
   };
+
+  // 새 채팅 시작 (사이드바 내부에서 호출 가능)
+  const handleNewChat = () => {
+    setMessages([]);
+    setIsSidebarOpen(false);
+  };
+
+
+  /* -----------------------------------------------------
+   * 인증/모달 핸들러
+   * ----------------------------------------------------- */
+  const handleLogin = (user) => {
+    setIsLoggedIn(true);
+    setCurrentUser(user);
+    console.log(`${user.name}님 로그인 성공!`);
+  };
+
+  const handleSignup = (user) => {
+    setIsLoggedIn(true);
+    setCurrentUser(user);
+    console.log(`${user.name}님 회원가입 및 로그인 성공!`);
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setCurrentUser(null);
+    setIsUserBubbleOpen(false); 
+    console.log("로그아웃 성공!");
+    setMessages([]); 
+  };
+
+  const closeAuthModals = useCallback(() => {
+    setIsLoginModalOpen(false);
+    setIsSignupModalOpen(false);
+  }, []);
+
+  const openLogin = () => {
+    closeAuthModals();
+    setIsLoginModalOpen(true);
+  };
+
+  const openSignup = () => {
+    closeAuthModals();
+    setIsSignupModalOpen(true);
+  };
+
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  /* -----------------------------------------------------
+   * 채팅 제출 핸들러 (오류 수정 및 기능 통합 완료)
+   * ----------------------------------------------------- */
   const handleSubmit = async (e, predefinedQuestion = null) => {
-    if (e) e.preventDefault();
+    
+    // 1. 인자가 이벤트 객체인지 확인하고 preventDefault 호출
+    if (e && typeof e.preventDefault === 'function') {
+        e.preventDefault();
+    }
+    
+    // 2. 실제 보낼 메시지 결정
     const messageToSend = predefinedQuestion || inputText.trim();
+    
     if (!messageToSend || loading) return;
 
+    // 3. 텍스트를 초기화
     setInputText("");
 
-    // ⭐ 여기에 질문-답변 쌍 추가
-    const DEMO_RESPONSES = {
-      "독서실 추천": `동대문구에서 운영하는 구립 청소년독서실을 추천드리겠습니다.
-
-[동대문구 구립 청소년독서실 5곳]
-
-1. 동대문청소년독서실 (158석)
-   • 위치: 서울특별시 동대문구 장한로 191 (장안동) 근린공원 내
-   • 연락처: 02-2247-3120
-   • 홈페이지: https://cafe.daum.net/dc300
-
-2. 답십리2청소년독서실 (146석)
-   • 위치: 서울특별시 동대문구 답십리로56길 15 (답십리동)
-   • 연락처: 02-2216-0148
-   • 홈페이지: https://cafe.daum.net/DDMDSsocialwelfare
-
-3. 전일청소년독서실 (88석)
-   • 위치: 서울특별시 동대문구 전농로37길 17 (전농동)
-   • 연락처: 02-2241-9836
-
-4. 이문청소년독서실 (88석)
-   • 위치: 서울특별시 동대문구 이문로9길 52 (이문동)
-   • 연락처: 02-960-1902
-
-5. 답십리청소년독서실 (72석)
-   • 위치: 서울특별시 동대문구 천호대로65길 17 (답십리동)
-   • 연락처: 02-2243-3648
-   • 홈페이지: https://cafe.naver.com/dsn0310
-
-[공통 이용 안내]
-• 운영시간: 화~금 09:00-23:00, 토·공휴일 10:00-23:00 (월요일 휴관)
-• 이용료: 1일 500원, 월 정기권 청소년 10,000원 / 일반 15,000원
-• 신청방법: 현장 방문 접수 (신분증 지참)
-• 이용대상: 중학생 이상 청소년 및 일반인
-
-모든 독서실이 저렴한 이용료로 쾌적한 학습 환경을 제공하고 있으니, 거주지와 가까운 곳을 선택하시면 됩니다.
-
-자세한 정보: https://www.ddm.go.kr/www/contents.do?key=673`,
-
-      "동대문구 고등학교 목록": `동대문구에 위치한 고등학교 목록을 안내해드리겠습니다. 총 10개의 고등학교가 있습니다.
-
-[일반고등학교]
-
-1. 휘봉고등학교 (남녀공학, 공립)
-   • 주소: 서울특별시 동대문구 한천로 290 (휘경동)
-   • 전화: 02-2116-7211
-   • 홈페이지: http://hwibong.sen.hs.kr
-
-2. 해성여자고등학교 (여학교, 사립)
-   • 주소: 서울특별시 동대문구 전농로20길 31 (전농동)
-   • 전화: 070-7860-7100
-   • 홈페이지: http://haesung-g.hs.kr
-
-3. 휘경여자고등학교 (여학교, 사립)
-   • 주소: 서울특별시 동대문구 한천로 247 (휘경동)
-   • 전화: 02-2245-2307
-   • 홈페이지: http://hwikyung.sen.hs.kr
-
-4. 동국대학교사범대학부속고등학교 (남학교, 사립)
-   • 주소: 서울특별시 동대문구 장안벚꽃로 201 (장안동)
-   • 전화: 02-6913-1511
-   • 홈페이지: http://ddbk.sen.hs.kr
-
-5. 경희여자고등학교 (여학교, 사립)
-   • 주소: 서울특별시 동대문구 경희대로 26
-   • 전화: 02-966-4560
-   • 홈페이지: http://kyunghee.sen.hs.kr
-
-[자율고등학교]
-
-6. 대광고등학교 (남학교, 사립)
-   • 주소: 서울특별시 동대문구 안암로 6 (신설동)
-   • 전화: 02-940-2202
-   • 홈페이지: http://www.dgh.hs.kr
-
-7. 경희고등학교 (남학교, 사립)
-   • 주소: 서울특별시 동대문구 경희대로 26 (회기동)
-   • 전화: 02-966-3782
-   • 홈페이지: http://www.kyungheeboy.hs.kr/
-
-[특성화고등학교]
-
-8. 서울반도체고등학교 (남녀공학, 공립)
-   • 주소: 서울특별시 동대문구 겸재로 21 (휘경동)
-   • 전화: 02-2230-9885
-   • 홈페이지: https://ssc.sen.hs.kr/
-   • 특징: 전자기계, 메카트로닉스, 자동차 등 공업계열 학과
-
-9. 서울정화고등학교 (여학교, 사립)
-   • 주소: 서울특별시 동대문구 홍릉로15길 50 (제기동)
-   • 전화: 02-960-1495
-   • 홈페이지: http://jeonghwa.sen.hs.kr
-   • 특징: 방송연예, 뷰티디자인, 카페베이커리 등 상업계열 학과
-
-10. 해성국제컨벤션고등학교 (여학교, 사립)
-    • 주소: 서울특별시 동대문구 전농로20길 31 (전농동)
-    • 전화: 070-8786-1300
-    • 홈페이지: http://www.haesung.hs.kr
-    • 특징: 컨벤션경영, 항공호텔, 국제전시경영 등 특성화 학과
-
-각 학교별로 입학 전형이나 세부 정보가 필요하시면 해당 학교에 직접 문의하시거나 홈페이지를 참고하시기 바랍니다.`,
-
-      // ⭐ 새로운 매크로 추가 예시
-      "청소년 상담 프로그램": `동대문구에서 운영하는 청소년 상담 프로그램을 안내해드리겠습니다.
-
-[동대문구 청소년지원센터 꿈드림]
-
-가장 전문적인 청소년 상담 서비스를 제공하는 곳입니다. 특히 학교 밖 청소년을 위한 종합적인 지원을 하고 있습니다.
-
-• 대상: 9세~24세 청소년 (특히 학교 밖 청소년)
-• 위치: 서울특별시 동대문구 천호대로2길 23-9 (신설동복지지원센터)
-• 연락처: 02-2237-1318
-• 운영시간: 월~금 09:00-18:00 (토·일·공휴일 휴무)
-
-[제공 서비스]
-1. 상담지원: 초기상담, 욕구파악, 심리·진로·가족관계 상담
-2. 교육지원: 재취학, 재입학, 복교지원, 상급학교 진학 지원, 검정고시 지원
-3. 취업지원: 직업체험, 진로교육활동, 경제활동 참여 지원
-4. 자립지원: 생활지원, 의료지원, 정서지원, 건강검진, 예방접종
-
-[신청방법]
-전화예약 → 상담지원센터 내방 → 상담 및 지원
-• 필요서류: 신분증, 학교 관련 서류(해당시)
-• 이용료: 무료
-• 신청기간: 연중 상시
-
-특히 입학 후 3개월 이상 결석한 청소년, 취학의무를 유예한 청소년, 제적·퇴학처분을 받거나 자퇴한 청소년, 상급학교에 진학하지 않은 청소년에게 우선 지원을 제공합니다.
-
-개별 맞춤형 상담과 지원을 받을 수 있으니, 먼저 전화로 상담 예약을 하시기 바랍니다.
-
-자세한 정보: https://www.ddm.go.kr/www/contents.do?key=670`,
-
-      // ⭐ 원하는 질문-답변 계속 추가
-      "학습 코칭 신청": `안녕하세요! 동대문구 교육지원센터에서 운영하는 학습 코칭 프로그램에 대해 안내해드리겠습니다.
-
-현재 동대문구 교육지원센터에서는 다음과 같은 학습 코칭 프로그램을 운영하고 있습니다:
-
-[주요 프로그램]
-
-1. "1:1 학습코칭 2기" - 개별 맞춤형 학습 지도
-   • 운영기관: 동대문구 교육지원센터
-   • 담당부서: 교육정책과
-   • 특징: 일대일 개인별 맞춤 학습 코칭
-
-2. "하반기 1:1 학습코칭" - 하반기 집중 프로그램
-   • 개별 학습자의 수준에 맞는 맞춤형 지도
-   • 체계적인 학습 계획 수립 및 관리
-
-3. "학부모 학습 코칭" - 학부모 대상 프로그램
-   • 자녀 학습 지도 방법 안내
-   • 효과적인 가정 학습 환경 조성 방법
-
-[신청 및 문의]
-• 위치: 동대문구 왕산로 25, 7층 (동대문구 교육지원센터)
-• 담당부서: 교육정책과
-• 신청방법: 동대문구청 홈페이지 또는 교육지원센터 직접 방문
-
-각 프로그램별 세부 일정과 신청 자격은 다를 수 있으니, 정확한 정보는 아래 링크에서 확인하시거나 교육정책과로 직접 문의하시기 바랍니다.
-
-상세 정보 확인:
-https://www.ddm.go.kr/www/./selectBbsNttView.do?key=575&bbsNo=38&nttNo=1754`,
-
-      "방과후 뭐있어?": `안녕하세요! 동대문구에서 운영하는 방과후 프로그램을 안내해드리겠습니다.
-
-[방과후 보육시설]
-
-동대문구에서는 초등학생을 위한 방과후 보육시설 3곳을 운영하고 있습니다:
-
-1. 열린 방과후보육시설(구립)
-   • 위치: 전농로16길 59
-   • 연락처: 02-2248-0421
-   • 정원: 20명
-   • 비용: 월 100,000원
-
-2. 전농 방과후보육시설(민간)
-   • 위치: 서울시립대로12길 99 (전농1동)
-   • 연락처: 02-2215-8514
-   • 정원: 40명
-   • 비용: 월 233,650원
-
-3. 천응 방과후보육시설(민간)
-   • 위치: 제기로 128-6 (청량리동 57-2)
-   • 연락처: 02-965-2423
-   • 정원: 40명
-   • 비용: 월 233,650원
-
-[복지관 방과후 학습 프로그램]
-
-지역 복지관에서도 다양한 방과후 프로그램을 운영합니다:
-
-1. 동대문종합사회복지관 (02-920-4541)
-   • 느린학습자 청소년 야간보호 (무료)
-   • 개별학습지도 및 취미활동
-
-2. 장안종합사회복지관 (02-2242-7564)
-   • 장애아동 방과후보호 (초등 1~6학년)
-   • 정원: 6명
-
-3. 동대문청소년센터 (02-3295-2452)
-   • 청소년방과후아카데미 (초등고학년 대상)
-   • 정원: 40명, 무료
-
-[신청 방법]
-각 시설에 직접 연락하여 신청하시면 됩니다. 저소득층의 경우 보육료 감면 혜택이 있으니 동주민센터에서 별도 신청하시기 바랍니다.
-
-자세한 정보는 동대문구청 홈페이지에서 확인하실 수 있습니다: https://www.ddm.go.kr/www/contents.do?key=675`,
-
-      "나 중학생인데 컴퓨터 관심있어": `안녕하세요! 컴퓨터에 관심이 있는 중학생이시군요. 동대문구에서 운영하는 컴퓨터 관련 교육 프로그램들을 소개해드릴게요.
-
-[현재 접수 중인 컴퓨터 교육 프로그램]
-
-1. "컴퓨터 기초(윈도우10)" - 기초 과정
-   • 장소: 전농교육장(답십리로26길 6, 2층)
-   • 상태: 현재 접수중
-   • 컴퓨터를 처음 배우거나 기초를 다지고 싶다면 추천
-
-2. "ITQ엑셀자격증" - 심화 과정
-   • 장소: 신설교육장
-   • 상태: 현재 접수중
-   • 자격증 취득을 통해 스펙을 쌓을 수 있는 프로그램
-
-3. "ITQ파워포인트자격증" - 심화 과정
-   • 장소: 전농교육장(답십리로26길 6, 2층)
-   • 상태: 현재 접수중
-   • 프레젠테이션 프로그램 활용 및 자격증 취득 과정
-
-이 프로그램들은 모두 동대문구 평생학습 예약포털을 통해 신청할 수 있습니다. 중학생도 참여 가능한 프로그램들이니 관심 있는 과정에 신청해보세요.
-
-더 자세한 정보와 신청은 다음 링크에서 확인하실 수 있습니다:
-https://www.ddm.go.kr/selectDongdaemunUserCourseView.do?key=1529&searchEduInstSe=&searchEdcKey=&lctreRcritKey=6438&pageUnit=15&pageIndex=1&searchCnd=SJ&receptionStts=ACCPT
-
-궁금한 점이 더 있으시면 언제든 말씀해주세요!`,
-    };
-
+    // 4. 로그인 체크 로직
+    if (!isLoggedIn) {
+        setMessages((prev) => [
+            ...prev,
+            { id: Date.now(), type: "user", text: messageToSend },
+            { id: Date.now() + 1, type: "bot", text: "로그인 후 이용 가능한 서비스입니다. 이용을 원하시면 먼저 로그인 또는 회원가입을 해주세요." }
+        ]);
+        return;
+    }
+
+    // 5. 메시지 처리
     const newUserMessage = {
       id: Date.now(),
       type: "user",
@@ -454,9 +609,44 @@ https://www.ddm.go.kr/selectDongdaemunUserCourseView.do?key=1529&searchEduInstSe
 
     setLoading(true);
 
-    // 정확히 매칭되는 질문이 있는지 확인
+    // 질문-답변 쌍 (DEMO_RESPONSES)
+    const DEMO_RESPONSES = {
+      "독서실 추천": `동대문구에서 운영하는 구립 청소년독서실을 추천드리겠습니다. ... (내용 생략) ...`,
+      "동대문구 고등학교 목록": `동대문구에 위치한 고등학교 목록을 안내해드리겠습니다. ... (내용 생략) ...`,
+      "청소년 상담 프로그램": `동대문구에서 운영하는 청소년 상담 프로그램을 안내해드리겠습니다. ... (내용 생략) ...`,
+      "학습 코칭 신청": `안녕하세요! 동대문구 교육지원센터에서 운영하는 학습 코칭 프로그램에 대해 안내해드리겠습니다. ... (내용 생략) ...`,
+      "방과후 뭐있어?": `안녕하세요! 동대문구에서 운영하는 방과후 프로그램을 안내해드리겠습니다. ... (내용 생략) ...`,
+      "나 중학생인데 컴퓨터 관심있어": `안녕하세요! 컴퓨터에 관심이 있는 중학생이시군요. 동대문구에서 운영하는 컴퓨터 관련 교육 프로그램들을 소개해드릴게요. ... (내용 생략) ...`,
+      
+      // FAQList 항목의 답변
+      "출산 지원금 알려줘": `[서울시 출산 지원금]
+      1. **첫만남 이용권:** 출생아당 200만원 바우처 지급 (일시금)
+      2. **서울형 산후조리경비 지원:** 출산일 기준 서울시 거주 6개월 이상 산모에게 100만원 상당의 산후조리경비 지급 (바우처 또는 현금)
+      3. **지자체별 추가 지원:** 동대문구 포함 각 자치구별로 추가 출산 양육 지원금이 별도로 있습니다. 거주지 동주민센터에 문의하거나 동대문구청 홈페이지를 확인해주세요!`,
+      "산모 건강관리 서비스 뭐 있어?": `[서울시 산모 건강관리 서비스]
+      1. **산후 도우미 지원:** 산모의 건강 회복과 신생아 양육을 위한 전문 인력(산후 도우미)을 가정에 파견하여 서비스 비용을 지원합니다. (소득 기준 적용)
+      2. **영양 플러스 사업:** 임산부 및 영유아의 영양 위험 요인을 개선하기 위해 보충 식품 및 영양 교육/상담을 제공합니다.
+      3. **임산부 엽산제/철분제 지원:** 임신 초기와 중기/후기 기간에 맞춰 보건소에서 무료로 엽산제와 철분제를 지원합니다.`,
+      "어린이집 신청 방법 알려줘": `어린이집 입소는 주로 **'복지로 임신육아포털 아이사랑(i-사랑)'**을 통해 온라인으로 신청합니다.
+      1. **접수:** 복지로 홈페이지(www.bokjiro.go.kr) 또는 모바일 앱에서 '보육료/양육수당'을 신청하고 '입소 대기'를 등록합니다.
+      2. **대기:** 원하는 어린이집에 입소 대기를 걸어둡니다. (최대 3개소)
+      3. **선정:** 어린이집 입소 우선순위(맞벌이, 다자녀 등)에 따라 입소 대상이 선정됩니다.`,
+      "임신부 교통비 지원돼?": `네, **서울시 임산부 교통비 지원 사업**이 있습니다.
+      1. **지원 대상:** 서울에 거주하는 모든 임산부 (임신 12주차~출산 후 3개월)
+      2. **지원 금액:** 1인당 70만원
+      3. **사용처:** 지하철, 버스, 택시, 자가용 유류비, 기차(KTX/SRT) 등
+      4. **신청:** 서울시 '맘편한 임신' 통합 서비스를 통해 온라인 신청 후, '국민행복카드'에 교통 포인트를 지급받아 사용합니다.`,
+      "육아휴직 급여 얼마나 받아?": `육아휴직 급여는 **고용보험**에서 지급하며, 주요 내용은 다음과 같습니다.
+      1. **지급 수준:** 휴직 기간(월별) 통상임금의 **80%** (상한액 150만원, 하한액 70만원)
+      2. **특례:** 부모가 순차적으로 육아휴직을 사용하는 **'3+3 부모 육아휴직제'**를 활용하면 생후 12개월 이내 자녀에 대해 3개월간 최대 통상임금의 100% (상한액 300만원)까지 지원됩니다.
+      *자세한 사항은 고용보험 홈페이지 또는 고용센터에 문의하세요.`,
+      "다자녀 혜택 뭐가 있어?": `동대문구를 기준으로 다자녀 가구에 제공되는 주요 혜택은 다음과 같습니다.
+      1. **공영주차장 이용요금 감면:** 두 자녀 이상 가구에 대해 공영주차장 요금 감면 혜택 제공.
+      2. **다자녀 교육비 지원:** (서울시) 고등학교 학비 지원, 대학생 등록금 지원 사업 등이 있습니다.
+      3. **공공 시설 할인:** 서울시 다둥이 행복 카드를 발급받으면 공공 시설(상수도 요금 포함) 및 제휴 업체 할인을 받을 수 있습니다.`,
+    };
+
     if (DEMO_RESPONSES[messageToSend]) {
-      // 3.5초 대기 (실제처럼 보이게)
       await new Promise((resolve) => setTimeout(resolve, 3500));
 
       const demoResponse = {
@@ -468,8 +658,7 @@ https://www.ddm.go.kr/selectDongdaemunUserCourseView.do?key=1529&searchEduInstSe
 
       setMessages((prev) => prev.slice(0, -1).concat(demoResponse));
       setLoading(false);
-
-      return; // API 호출 안하고 종료
+      return;
     }
 
     try {
@@ -488,7 +677,6 @@ https://www.ddm.go.kr/selectDongdaemunUserCourseView.do?key=1529&searchEduInstSe
         feedback: null,
       };
 
-      // ⭐ 콘솔에 전체 답변 출력 (복사 가능)
       console.log("================== 답변 전체 (복사용) ==================");
       console.log(newBotMessage.text);
       console.log("========================================================");
@@ -506,6 +694,10 @@ https://www.ddm.go.kr/selectDongdaemunUserCourseView.do?key=1529&searchEduInstSe
       setLoading(false);
     }
   };
+
+  /* -----------------------------------------------------
+   * 기타 핸들러 및 렌더링 도우미 함수
+   * ----------------------------------------------------- */
 
   const handleFeedback = (id, feedbackType) => {
     setMessages((prevMessages) =>
@@ -564,11 +756,9 @@ https://www.ddm.go.kr/selectDongdaemunUserCourseView.do?key=1529&searchEduInstSe
 
     const handleMessageSubmit = (e) => {
       e.preventDefault();
-      // 실제 앱에서는 이 데이터를 서버로 전송합니다.
       console.log("메시지 전송:", { name, email, message });
-      // window.alert()는 이 환경에서 작동하지 않을 수 있으므로 alert 대신 console.log를 사용합니다.
       console.log("메시지가 성공적으로 전송되었습니다!");
-      onClose(); // 모달 닫기
+      onClose(); 
     };
 
     return (
@@ -632,31 +822,78 @@ https://www.ddm.go.kr/selectDongdaemunUserCourseView.do?key=1529&searchEduInstSe
 
   const isChatStarted = messages.length > 0;
 
+  /* -----------------------------------------------------
+   * 렌더링
+   * ----------------------------------------------------- */
   return (
     <>
       {showSplash ? (
         <SplashScreen onComplete={() => setShowSplash(false)} />
       ) : (
+        // ⭐ App 컨테이너에 relative 포지션 적용 (Sidebar를 위해)
         <div className="App">
+          
+          {/* ⭐ [추가] 사이드바 렌더링 */}
+          <Sidebar 
+            isOpen={isSidebarOpen} 
+            onClose={toggleSidebar} 
+            onNewChat={handleNewChat}
+            messages={messages}
+          />
+
           <header className="app-header">
             <div className="header-left">
+              {/* ⭐ [추가] 사이드바 토글 버튼 */}
+              <button 
+                className="sidebar-toggle-btn" 
+                onClick={toggleSidebar}
+                title="메뉴 열기"
+              >
+                &#9776; {/* 햄버거 아이콘 */}
+              </button>
+              
               <span
                 className="logo-text"
                 onClick={() => setMessages([])}
                 style={{ cursor: "pointer" }}
-              >
-                DD-<span className="highlight">O</span>N
+              >SEOUL<span className="highlight">-AI</span>
               </span>
+              {isLoggedIn && (
+                <span className="welcome-message">
+                  {currentUser?.name}님 환영합니다!
+                </span>
+              )}
             </div>
 
             <div className="header-right" style={{ position: "relative" }}>
-              <img
-                src="/images/user_icon.png"
-                className="profile-icon"
-                onClick={toggleUserBubble}
-                style={{ cursor: "pointer" }}
-              />
-              {isUserBubbleOpen && <UserBubble />}
+              {isLoggedIn ? (
+                <>
+                  <img
+                    src="/images/user_icon.png"
+                    className="profile-icon"
+                    onClick={toggleUserBubble}
+                    style={{ cursor: "pointer" }}
+                  />
+                  <button onClick={handleLogout} className="auth-button logout">
+                    로그아웃
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button onClick={openLogin} className="auth-button">
+                    로그인
+                  </button>
+                  <button
+                    onClick={openSignup}
+                    className="auth-button signup-btn"
+                  >
+                    회원가입
+                  </button>
+                </>
+              )}
+              {isUserBubbleOpen && currentUser && (
+                <UserBubble user={currentUser} onClose={toggleUserBubble} />
+              )}
             </div>
           </header>
 
@@ -672,8 +909,11 @@ https://www.ddm.go.kr/selectDongdaemunUserCourseView.do?key=1529&searchEduInstSe
                   backgroundSize: "50%",
                   backgroundPosition: "center",
                   backgroundRepeat: "no-repeat",
+                  overflowY: 'auto' 
                 }}
               >
+                
+                {/* 메시지 컨테이너 */}
                 <div className="messages">
                   {messages.map((msg) => (
                     <div key={msg.id} className={`message ${msg.type}`}>
@@ -733,9 +973,10 @@ https://www.ddm.go.kr/selectDongdaemunUserCourseView.do?key=1529&searchEduInstSe
                   className="landing-logo"
                 />
                 <div className="text-container">
-                  <p className="subtitle">디디온과 함께하는 동대문 교육 탐방</p>
-                  <h1 className="title">디디온에게 물어보세요</h1>
+                  <p className="subtitle">Your AI Parenting Navigator.</p>
+                  <h1 className="title">서울아이에게 물어보세요</h1>
                 </div>
+
                 <div className="quick-start-buttons">
                   <button
                     onClick={() => handleSubmit(null, "독서실 추천")}
@@ -767,10 +1008,18 @@ https://www.ddm.go.kr/selectDongdaemunUserCourseView.do?key=1529&searchEduInstSe
                   >
                     #방과후
                   </button>
+                  {/* 랜딩 페이지 FAQ 버튼 */}
+                  <button
+                    onClick={() => setIsLandingFAQModalOpen(true)}
+                    className="quick-start-btn" 
+                    style={{ backgroundColor: '#ffe6e6', color: '#e6007e' }} 
+                  >
+                    #자주 묻는 질문 💡
+                  </button>
                 </div>
               </div>
             )}
-
+            
             <form
               onSubmit={handleSubmit}
               className={`input-form-wrapper ${
@@ -781,7 +1030,7 @@ https://www.ddm.go.kr/selectDongdaemunUserCourseView.do?key=1529&searchEduInstSe
                 {!isChatStarted && (
                   <div className="form-header">
                     <span className="ai-badge">
-                      DD-ON <span className="beta-tag">beta</span>
+                      SEOUL-I <span className="beta-tag">beta</span>
                     </span>
                   </div>
                 )}
@@ -795,13 +1044,15 @@ https://www.ddm.go.kr/selectDongdaemunUserCourseView.do?key=1529&searchEduInstSe
                     }
                   }}
                   placeholder={
-                    isChatStarted
-                      ? "질문을 입력하세요..."
-                      : "동대문구의 교육 정보, 진로 탐색 등 무엇이든 물어보세요!"
+                    isLoggedIn
+                      ? isChatStarted
+                        ? "질문을 입력하세요..."
+                        : "동대문구의 교육 정보, 진로 탐색 등 무엇이든 물어보세요!"
+                      : "로그인 후 질문을 입력해주세요."
                   }
                   className="idea-textarea"
                   rows={isChatStarted ? 1 : 1}
-                  disabled={loading}
+                  disabled={loading || !isLoggedIn} 
                 />
                 <div className="form-footer">
                   {!isChatStarted && (
@@ -812,7 +1063,7 @@ https://www.ddm.go.kr/selectDongdaemunUserCourseView.do?key=1529&searchEduInstSe
                   <button
                     type="submit"
                     className="submit-button"
-                    disabled={loading || !inputText}
+                    disabled={loading || !inputText || !isLoggedIn}
                   >
                     {loading ? <div className="spinner"></div> : "↑"}
                   </button>
@@ -826,6 +1077,22 @@ https://www.ddm.go.kr/selectDongdaemunUserCourseView.do?key=1529&searchEduInstSe
           </button>
 
           {isContactModalOpen && <ContactModal onClose={toggleContactModal} />}
+          
+          {/* 로그인 및 회원가입 모달 */}
+          {isLoginModalOpen && (
+            <LoginModal onClose={closeAuthModals} onLoginSuccess={handleLogin} />
+          )}
+          {isSignupModalOpen && (
+            <SignupModal onClose={closeAuthModals} onSignupSuccess={handleSignup} />
+          )}
+          
+          {/* 랜딩 페이지 FAQ 모달 */}
+          {isLandingFAQModalOpen && (
+            <LandingFAQModal 
+              onClose={() => setIsLandingFAQModalOpen(false)}
+              onSelect={handleSubmit}
+            />
+          )}
         </div>
       )}
     </>

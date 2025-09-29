@@ -1,4 +1,4 @@
-/* 기본 스타일 초기화 */
+/* 기본 스타일 초기화 (기존 코드 유지) */
 * {
   margin: 0;
   padding: 0;
@@ -13,10 +13,14 @@ body {
 
 /* --- 전체 앱 레이아웃 --- */
 .App {
+  /* ⭐ [수정] 사이드바 구현을 위해 relative로 변경 */
+  position: relative; 
   display: flex;
   flex-direction: column;
   height: 100vh;
   overflow: hidden;
+  opacity: 0;
+  animation: fadeInOnly 1s ease-out 0.9s forwards;
 }
 
 /* --- 상단 헤더 --- */
@@ -28,32 +32,204 @@ body {
   padding: 15px 50px;
   border-bottom: 3px solid #f0f0f0;
   flex-shrink: 0;
+  /* ⭐ [추가] 사이드바가 열려도 헤더가 위에 있도록 z-index 설정 */
+  z-index: 100;
+  background-color: white; 
 }
 
 .header-left,
 .header-right {
   display: flex;
   align-items: center;
-  gap: 30px;
+  gap: 15px; 
 }
 .logo-text {
   font-weight: bold;
   font-size: 40px;
 }
 .logo-text .highlight {
-  color: red; 
+  color: #007aff; 
 }
-.nav-link {
-  text-decoration: none;
-  color: #ffffff;
-  font-size: 15px;
+
+/* -----------------------------------------------------
+ * 🌟 사이드바 스타일
+ * ----------------------------------------------------- */
+
+.sidebar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 280px; /* 사이드바 폭 */
+    height: 100%;
+    background-color: #f7f7f7; /* 배경색 */
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    z-index: 999;
+    transition: transform 0.3s ease-in-out;
+    display: flex;
+    flex-direction: column;
 }
-.profile-icon {
-  width: 45px;       /* 아이콘 크기 */
-  height: 45px;
-  border-radius: 50%;
-  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4));
-  transition: transform 0.2s ease; /* 호버할 때 살짝 커지게 */
+
+.sidebar.closed {
+    transform: translateX(-100%);
+}
+
+.sidebar.open {
+    transform: translateX(0);
+}
+
+.sidebar-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: 998;
+    cursor: pointer;
+}
+
+.sidebar-header {
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.sidebar-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #333;
+}
+
+.sidebar-close-btn {
+    background: none;
+    border: none;
+    font-size: 30px;
+    cursor: pointer;
+    color: #888;
+}
+
+.sidebar-content {
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.sidebar-toggle-btn {
+    background: none;
+    border: none;
+    font-size: 30px;
+    cursor: pointer;
+    color: #333;
+    margin-right: 15px;
+    transition: color 0.2s;
+}
+.sidebar-toggle-btn:hover {
+    color: #007aff;
+}
+
+.sidebar-new-chat-btn {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #007aff;
+    border-radius: 8px;
+    background-color: #007aff;
+    color: white;
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.sidebar-new-chat-btn:hover {
+    background-color: #0056b3;
+}
+
+.sidebar-history h5, .sidebar-settings h5 {
+    font-size: 14px;
+    font-weight: 700;
+    color: #555;
+    margin-top: 15px;
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+    border-bottom: 1px dashed #e0e0e0;
+}
+
+.sidebar-history ul {
+    list-style: none;
+    padding: 0;
+}
+.sidebar-history li {
+    font-size: 14px;
+    color: #333;
+    padding: 8px 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    cursor: pointer;
+}
+.sidebar-history li:hover {
+    background-color: #e0e0e0;
+}
+.sidebar-settings p.no-history {
+    color: #888;
+    font-size: 14px;
+}
+
+/* -----------------------------------------------------
+ * 기존 스타일 (Auth, Modals, Chat, Landing)
+ * ----------------------------------------------------- */
+
+.welcome-message {
+  font-size: 16px;
+  font-weight: 500;
+  color: #666;
+  margin-left: 10px;
+}
+
+.auth-button {
+  padding: 8px 15px;
+  border: 1px solid #ddd;
+  border-radius: 18px;
+  background-color: transparent;
+  color: #333;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.auth-button:hover {
+  background-color: #f0f0f0;
+}
+
+.auth-button.signup-btn {
+  border: 1px solid #007aff;
+  background-color: #007aff;
+  color: white;
+}
+
+.auth-button.signup-btn:hover {
+  background-color: #0056b3;
+}
+
+.auth-button.logout {
+    border: 1px solid #dc3545;
+    background-color: #dc3545;
+    color: white;
+}
+
+.auth-button.logout:hover {
+    background-color: #c82333;
+}
+
+.error-message {
+    color: #dc3545;
+    font-size: 13px;
+    margin-top: -10px;
+    margin-bottom: 5px;
+    font-weight: 500;
 }
 
 /* --- 메인 콘텐츠 영역 --- */
@@ -66,101 +242,98 @@ body {
   flex-direction: column;
   padding: 0 20px 20px 20px;
   overflow: hidden;
-  justify-content: center; /* 콘텐츠를 수직 중앙에 정렬 */
+  justify-content: center;
 }
 
+/* --- 사용자 정보 출력 (UserBubble) 스타일 조정 --- */
 .user-bubble {
   position: absolute;
-  top: 70px; /* 아이콘 아래 */
+  top: 70px;
   right: 0;
   background-color: white;
-  padding: 15px;
-  border-radius: 12px;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.2);
-  width: 450px;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+  width: 300px;
   z-index: 200;
-  font-family: Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #333;
 }
 
-/* 화살표 */
 .user-bubble::before {
   content: "";
   position: absolute;
-  top: -30px;
-  right: 10px; /* 아이콘 위치에 맞춤 */
-  border-width: 0 10px 30px 10px;
-  border-style: solid;
-  border-color: transparent transparent white transparent;
+  top: -10px;
+  right: 15px;
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-bottom: 10px solid white;
+}
+
+.user-bubble h3 {
+    font-size: 18px;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
 }
 
 .user-bubble p {
-  font-weight: bold;
-  margin-bottom: 8px; /* 원하는 간격으로 조절 */
+  font-weight: normal;
+  margin-bottom: 8px;
+  font-size: 14px;
 }
 
-/* 초중고 그룹 */
+.user-bubble strong {
+    font-weight: 600;
+    color: #555;
+    margin-right: 5px;
+}
+
 .user-bubble .radio-group {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 20px;
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
 }
 
 .user-bubble .radio-group label {
-  display: flex;
-  padding: 0 30px; /* 좌우 여백 */
-  align-items: center;
-  gap: 5px;
-  cursor: pointer;
+    padding: 0;
+    width: auto;
+    font-size: 14px;
 }
 
-/* 성별 라디오 그룹 */
-.user-bubble .gender-group {
-  display: flex;
-  justify-content: center;  /* 가운데 정렬 */
-  gap: 10px;                /* 버튼 간격 */
-  margin-bottom: 20px;
-  width: fit-content;  /* 버튼 폭만 차지 */
-  margin: 0 auto;
-  padding: 0 20px;              /* 각 버튼 좌우 여백 */
+.user-bubble .radio-group {
+  justify-content: flex-start;
 }
 
-.user-bubble .gender-group label {
-  display: flex;
-  align-items: center;
-  gap: 3px;
-  padding: 0;
-  cursor: pointer;
-  width: auto;
-}
-
-
-/* 셀렉트박스 */
 .user-bubble .dong-select {
   width: 100%;
-  padding: 5px;
-  margin-bottom: 20px;
-  border-radius: 5px;
+  padding: 8px;
+  margin-bottom: 15px;
+  border-radius: 8px;
   border: 1px solid #ccc;
   font-size: 14px;
 }
 
-/* 확인 버튼 */
 .user-bubble .submit-btn {
   width: 100%;
-  padding: 7px 0;
+  padding: 8px 0;
   border: none;
-  background-color: #4a90e2;
+  background-color: #5cb85c; 
   color: white;
-  border-radius: 5px;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 15px;
+  font-weight: 600;
 }
 
 .user-bubble .submit-btn:hover {
-  background-color: #357ab8;
+  background-color: #449d44;
 }
 
-/* --- 랜딩 페이지 UI (채팅 시작 전) --- */
+/* --- 랜딩 페이지 UI --- */
 .landing-container {
   display: flex;
   flex-direction: column;
@@ -168,7 +341,6 @@ body {
   text-align: center;
 }
 
-/* 두둥실 떠다니는 애니메이션 */
 @keyframes floatAnimation {
   0%,
   100% {
@@ -203,7 +375,6 @@ body {
   font-weight: 700;
 }
 
-/* 퀵 스타트 버튼 스타일 */
 .quick-start-buttons {
   display: flex;
   justify-content: center;
@@ -230,8 +401,9 @@ body {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
 
-/* --- 채팅 UI (채팅 시작 후) --- */
+/* --- 채팅 UI --- */
 .chat-container {
+  position: relative; 
   flex: 1;
   overflow-y: auto;
   padding-top: 20px;
@@ -360,6 +532,7 @@ body {
   }
 }
 
+/* --- 입력 폼 --- */
 .input-form-wrapper {
   width: 100%;
   padding-top: 20px;
@@ -417,7 +590,7 @@ body {
   height: 36px;
   border-radius: 10px;
   border: none;
-  background-color: #333;
+  background-color: #007aff;
   color: white;
   font-size: 20px;
   cursor: pointer;
@@ -426,22 +599,20 @@ body {
   align-items: center;
   transition: background-color 0.2s;
 }
+.submit-button:hover {
+    background-color: #0056b3;
+}
 .submit-button:disabled {
   background-color: #e0e0e0;
   cursor: not-allowed;
 }
 .spinner {
-  border: 3px solid rgba(0, 0, 0, 0.2);
+  border: 3px solid rgba(255, 255, 255, 0.2);
   border-radius: 50%;
-  border-top-color: #333;
+  border-top-color: white;
   width: 18px;
   height: 18px;
   animation: spin 1s ease-in-out infinite;
-}
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
 }
 .input-form-wrapper.chat-mode .input-form-container {
   display: flex;
@@ -497,36 +668,27 @@ body {
   animation: fadeIn 0.3s ease;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
 .contact-modal-content {
   background: #ffffff;
-  padding: 20px;
+  padding: 25px 30px;
   border-radius: 18px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
   width: 90%;
-  max-width: 400px;
+  max-width: 450px;
   animation: slideUp 0.4s ease;
   position: relative;
   color: #333;
+  
+  /* 스크롤 가능하도록 설정 */
+  max-height: 85vh; 
+  overflow-y: auto; 
 }
 
-@keyframes slideUp {
-  from {
-    transform: translateY(30px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
+.contact-modal-content.landing-faq-modal {
+    max-width: 600px; /* FAQ 리스트 모달 폭을 넓게 설정 */
+    height: 90vh;
+    max-height: 90vh;
+    padding: 30px 25px;
 }
 
 .modal-header {
@@ -538,31 +700,21 @@ body {
   margin-bottom: 20px;
 }
 
-.modal-bot-icon {
-  display: none; /* 새 모달에서는 아이콘을 숨깁니다. */
-  font-size: 24px;
-  background: #f0f4f8;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  align-items: center;
-  justify-content: center;
-}
-
 .modal-header h3 {
-  font-size: 18px;
-  font-weight: 600;
+  font-size: 22px; 
+  font-weight: 700;
   margin: 0;
   flex: 1;
+  color: #007aff;
 }
 
 .modal-close-btn {
   position: absolute;
-  top: 10px;
+  top: 15px;
   right: 15px;
   background: none;
   border: none;
-  font-size: 24px;
+  font-size: 28px; 
   color: #888;
   cursor: pointer;
   transition: color 0.2s;
@@ -591,31 +743,30 @@ body {
 }
 
 .modal-footer {
-  margin-top: 20px;
-  text-align: right; /* 버튼을 오른쪽 정렬합니다. */
+  margin-top: 25px; 
+  text-align: right;
 }
 
 .modal-action-btn {
-  width: auto; /* 버튼 크기를 내용에 맞게 조절 */
-  padding: 10px 25px; /* 버튼 내부 여백 조정 */
-  background: #a38e8e; /* 버튼 색상 변경 */
+  width: 100%; 
+  padding: 12px 25px; 
+  background: #007aff; 
   color: white;
   border: none;
-  border-radius: 18px;
-  font-size: 16px;
+  border-radius: 8px; 
+  font-size: 17px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 10px rgba(0, 122, 255, 0.3);
 }
 
 .modal-action-btn:hover {
-  background: #0056b3; /* 마우스 오버 시 색상 변경 */
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  background: #0056b3;
+  transform: translateY(0);
+  box-shadow: 0 4px 15px rgba(0, 122, 255, 0.4);
 }
 
-/* 모달 내부 메시지 폼 스타일 */
 .modal-form {
   display: flex;
   flex-direction: column;
@@ -628,14 +779,15 @@ body {
 }
 
 .form-group label {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   color: #333;
   margin-bottom: 8px;
 }
 
 .form-group input,
-.form-group textarea {
+.form-group textarea,
+.modal-body select {
   width: 100%;
   padding: 12px;
   border: 1px solid #ddd;
@@ -643,10 +795,12 @@ body {
   font-size: 15px;
   font-family: inherit;
   transition: border-color 0.2s, box-shadow 0.2s;
+  background-color: #fff;
 }
 
 .form-group input:focus,
-.form-group textarea:focus {
+.form-group textarea:focus,
+.modal-body select:focus {
   outline: none;
   border-color: #007aff;
   box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.2);
@@ -657,12 +811,276 @@ body {
   min-height: 100px;
 }
 
-/* --- 반응형 스타일 --- */
+/* -----------------------------------------------------
+ * 모달 내 라디오 버튼 그룹 스타일 (회원가입 모달)
+ * ----------------------------------------------------- */
+
+.modal-form hr {
+    border: 0;
+    border-top: 1px solid #f0f0f0;
+    margin: 20px 0;
+}
+
+.modal-form p {
+    font-size: 15px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.modal-form .radio-group {
+    display: flex;
+    justify-content: space-around;
+    gap: 10px;
+    margin-bottom: 15px;
+    padding: 10px;
+    background-color: #f7f7f7;
+    border-radius: 8px;
+}
+
+.modal-form .radio-group label {
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+    font-size: 15px;
+    cursor: pointer;
+    margin-bottom: 0;
+}
+
+.modal-form .radio-group input[type="radio"] {
+    margin-right: 5px;
+    width: 15px;
+    height: 15px;
+}
+
+/* -----------------------------------------------------
+ * FAQList 스타일
+ * ----------------------------------------------------- */
+
+.faq-list-container { 
+  margin-bottom: 2rem; 
+  width: 100%;
+  max-width: 100%; 
+  margin: 0 auto;
+}
+
+.landing-faq-modal .faq-list-container {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+}
+
+.faq-header-group { 
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  width: 100%;
+}
+
+.faq-header-center { 
+  display: flex;
+  align-items: center;
+}
+
+.faq-line-left,
+.faq-line-right { 
+  height: 1px;
+  background: linear-gradient(to right, transparent, #ccc, transparent);
+  width: 9rem; 
+  flex-shrink: 1; 
+}
+
+.faq-title-button { 
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; 
+  padding: 0.5rem 1rem; 
+  background-color: white;
+  border-radius: 9999px; 
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); 
+  border: 1px solid #e5e7eb; 
+  margin: 0 1rem; 
+  flex-shrink: 0;
+}
+
+.faq-title-icon { 
+  width: 1rem;
+  height: 1rem;
+  color: #ec4899; 
+}
+
+.faq-title-text { 
+  font-size: 0.875rem; 
+  font-weight: 500;
+  color: #4b5563; 
+}
+
+.faq-toggle-button { 
+  position: absolute;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem; 
+  cursor: pointer;
+  color: #9ca3af; 
+  transition: color 0.2s ease;
+}
+
+.faq-toggle-button:hover {
+  color: #4b5563; 
+}
+
+.faq-toggle-text { 
+  font-size: 0.75rem; 
+}
+
+.faq-toggle-icon { 
+  width: 0.75rem;
+  height: 0.75rem;
+  transition: transform 0.2s ease;
+}
+
+.faq-toggle-icon.rotate { 
+  transform: rotate(180deg);
+}
+
+.faq-grid { 
+  display: grid;
+  grid-template-columns: 1fr; 
+  gap: 0.75rem; 
+}
+
+@media (min-width: 640px) { 
+  .faq-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) { 
+  .faq-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.faq-item-button { 
+  position: relative;
+  background-color: white;
+  border: 1px solid #e5e7eb; 
+  border-radius: 0.75rem; 
+  padding: 1rem; 
+  text-align: left;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); 
+  cursor: pointer;
+}
+
+.faq-item-button:hover { 
+  background: linear-gradient(to right, #fdf2f8, #f5f3ff); 
+  border-color: #fbcfe8; 
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.faq-item-header { 
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem; 
+}
+
+.faq-category-tag { 
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.5rem; 
+  background-color: #f3f4f6; 
+  font-size: 0.75rem; 
+  color: #4b5563; 
+  border-radius: 9999px; 
+  transition: all 0.2s ease;
+}
+
+.faq-item-button:hover .faq-category-tag { 
+  background-color: #fce7f6; 
+  color: #be185d; 
+}
+
+.faq-arrow-icon-wrapper { 
+  transition: all 0.2s ease;
+  opacity: 0;
+  transform: translateX(-8px);
+}
+
+.faq-item-button:hover .faq-arrow-icon-wrapper { 
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.faq-arrow-icon { 
+  width: 1rem;
+  height: 1rem;
+  color: #ec4899; 
+}
+
+.faq-item-content { 
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem; 
+}
+
+.faq-item-icon { 
+  font-size: 1.25rem; 
+  flex-shrink: 0;
+}
+
+.faq-item-text { 
+  font-size: 0.875rem; 
+  color: #4b5563; 
+  font-weight: 500;
+  line-height: 1.625; 
+  transition: color 0.2s ease;
+}
+
+.faq-item-button:hover .faq-item-text { 
+  color: #111827; 
+}
+
+.faq-hover-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to right, rgba(236, 72, 153, 0.05), rgba(147, 51, 234, 0.05)); 
+  border-radius: 0.75rem;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.faq-item-button:hover .faq-hover-bg {
+  opacity: 1;
+}
+
+.faq-guidance-text { 
+  text-align: center;
+  margin-top: 1.5rem; 
+}
+
+.faq-guidance-text p { 
+  font-size: 0.875rem; 
+  color: #6b7280; 
+}
+
+/* --- 반응형 스타일 (기존 코드 유지) --- */
 @media (max-width: 768px) {
   .app-header {
     padding: 15px 20px;
   }
-
+  
+  /* 모바일에서 사이드바 폭 줄이기 */
+  .sidebar {
+    width: 250px;
+  }
+  
   .main-content {
     padding: 0 20px 20px;
   }
@@ -675,85 +1093,25 @@ body {
     font-size: 16px;
   }
 
-  /* 화면이 작아지면 문의하기 버튼 숨기기 */
+  .user-bubble {
+    right: 20px;
+    width: 250px;
+  }
+  
+  .user-bubble::before {
+    right: 30px;
+  }
+
+  .contact-modal-content {
+    max-height: 95vh;
+  }
+
   .fab-contact {
     display: none;
   }
 }
 
-/* --- 스플래시 화면 스타일 --- */
-.splash-screen {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  background-color: #fff;
-  z-index: 9999;
-  animation: fadeOut 1s ease-out 3.2s forwards; 
-}
-
-.splash-logo {
-  width: 250px;
-  height: 250px;
-  object-fit: contain;
-  margin-bottom: 30px;
-  opacity: 0;
-  animation: fadeIn 1s ease-in-out forwards;
-}
-
-.splash-title {
-  font-size: 48px;
-  font-weight: 700;
-  color: #333;
-  opacity: 0;
-  animation: fadeIn 1s ease-in-out 0.8s forwards;
-  margin-bottom: 10px;
-}
-
-.splash-description {
-  font-size: 20px;
-  color: #666;
-  opacity: 0;
-  animation: fadeIn 0.8s ease-in-out 1.0s forwards;
-  margin-bottom: 30px;
-}
-
-.splash-text {
-  font-size: 18px;
-  color: #666;
-  text-align: center;
-  line-height: 1.5;
-  margin-top: 20px;
-  opacity: 0;
-  animation: fadeIn 1s ease-in-out 0.5s forwards;
-}
-
-.loading-spinner {
-  width: 50px;
-  height: 50px;
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #4a90e2;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-/* --- 메인 화면 진입 애니메이션 수정 --- */
-.App {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  overflow: hidden;
-  opacity: 0;
-  /* 🌟 수직 이동을 제거하고 투명도 애니메이션만 적용 */
-  animation: fadeInOnly 1s ease-out 0.9s forwards; 
-}
-
-/* --- 애니메이션 키프레임 --- */
+/* --- 애니메이션 키프레임 (기존 코드 유지) --- */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -784,9 +1142,19 @@ body {
   }
 }
 
-/* 🌟 새로운 키프레임 정의: 투명도만 조절 */
 @keyframes fadeInOnly {
   to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
     opacity: 1;
   }
 }
