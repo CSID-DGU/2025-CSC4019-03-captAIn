@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
+// FAQList 컴포넌트는 src/components/interactive/FAQList.js에 위치해야 합니다.
 import FAQList from './components/interactive/FAQList'; 
 import "./App.css";
 
@@ -421,6 +422,7 @@ const LandingFAQModal = ({ onClose, onSelect }) => {
             ×
           </button>
         </div>
+        {/* onSelect 시, 질문을 보내고 모달을 닫도록 연결 */}
         <FAQList onSelect={(question) => {
             onSelect(null, question); // handleSubmit(null, question) 형식에 맞춤
             onClose(); 
@@ -435,15 +437,14 @@ const LandingFAQModal = ({ onClose, onSelect }) => {
  * 6. 사이드바 컴포넌트
  * ----------------------------------------------------- */
 const Sidebar = ({ isOpen, onClose, onNewChat, messages }) => {
-  // 간단한 채팅 기록 목록을 보여주기 위한 로직
   const chatHistory = messages.filter(msg => msg.type === 'user' && !msg.typing)
                             .map(msg => msg.text)
-                            .slice(0, 5) // 최근 5개만 표시
-                            .reverse(); // 최신 메시지가 위로 오도록
+                            .slice(0, 5) 
+                            .reverse(); 
 
   return (
     <>
-      {/* 1. 오버레이 (사이드바가 닫힐 때 클릭하여 닫기) */}
+      {/* 1. 오버레이 */}
       {isOpen && <div className="sidebar-overlay" onClick={onClose}></div>}
       
       {/* 2. 사이드바 본체 */}
@@ -464,6 +465,7 @@ const Sidebar = ({ isOpen, onClose, onNewChat, messages }) => {
             <h5>최근 질문</h5>
             {chatHistory.length > 0 ? (
               <ul>
+                {/* 각 채팅 기록을 누르면 해당 채팅으로 돌아가도록 구현할 수 있음 */}
                 {chatHistory.map((text, index) => (
                   <li key={index} title={text}>
                     {text.substring(0, 30)}...
@@ -506,7 +508,7 @@ function App() {
   // FAQ 표시 상태 관리
   const [isLandingFAQModalOpen, setIsLandingFAQModalOpen] = useState(false);
 
-  // ⭐ [추가] 사이드바 상태 관리
+  // 사이드바 상태 관리
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
 
@@ -515,15 +517,14 @@ function App() {
     setIsUserBubbleOpen(!isUserBubbleOpen);
   };
   
-  // 사이드바 토글 핸들러
   const toggleSidebar = () => {
     setIsSidebarOpen(prev => !prev);
   };
 
-  // 새 채팅 시작 (사이드바 내부에서 호출 가능)
   const handleNewChat = () => {
     setMessages([]);
     setIsSidebarOpen(false);
+    setInputText("");
   };
 
 
@@ -830,10 +831,10 @@ function App() {
       {showSplash ? (
         <SplashScreen onComplete={() => setShowSplash(false)} />
       ) : (
-        // ⭐ App 컨테이너에 relative 포지션 적용 (Sidebar를 위해)
+        // App 컨테이너에 relative 포지션 적용 (Sidebar를 위해)
         <div className="App">
           
-          {/* ⭐ [추가] 사이드바 렌더링 */}
+          {/* 사이드바 렌더링 */}
           <Sidebar 
             isOpen={isSidebarOpen} 
             onClose={toggleSidebar} 
@@ -843,7 +844,7 @@ function App() {
 
           <header className="app-header">
             <div className="header-left">
-              {/* ⭐ [추가] 사이드바 토글 버튼 */}
+              {/* 사이드바 토글 버튼 */}
               <button 
                 className="sidebar-toggle-btn" 
                 onClick={toggleSidebar}
@@ -1008,7 +1009,7 @@ function App() {
                   >
                     #방과후
                   </button>
-                  {/* 랜딩 페이지 FAQ 버튼 */}
+                  {/* 랜딩 페이지 FAQ 버튼 (퀵 스타트 버튼 목록에 통합) */}
                   <button
                     onClick={() => setIsLandingFAQModalOpen(true)}
                     className="quick-start-btn" 
@@ -1019,6 +1020,8 @@ function App() {
                 </div>
               </div>
             )}
+            
+            {/* 채팅창 내 FAQ 버튼 제거됨 */}
             
             <form
               onSubmit={handleSubmit}
