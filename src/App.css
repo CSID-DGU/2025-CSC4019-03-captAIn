@@ -13,7 +13,6 @@ body {
 
 /* --- 전체 앱 레이아웃 --- */
 .App {
-  /* ⭐ [수정] 사이드바 구현을 위해 relative로 변경 */
   position: relative; 
   display: flex;
   flex-direction: column;
@@ -35,9 +34,7 @@ body {
   justify-content: center;
   align-items: center;
   background-color: #fff;
-  /* ⭐ [수정] 메인 앱 위에 확실히 덮이도록 z-index를 높게 설정 */
   z-index: 99999; 
-  /* 3.2초 후에 1초 동안 fadeOut 애니메이션 적용 */
   animation: fadeOut 1s ease-out 3.2s forwards; 
 }
 
@@ -102,14 +99,13 @@ body {
 .header-left,
 .header-right {
   display: flex;
-  /* ⭐ [보강] 모든 내부 요소를 세로축 중앙에 정렬 */
-  align-items: center; 
+  align-items: center;
   gap: 15px; 
 }
 .logo-text {
   font-weight: bold;
   font-size: 40px;
-  line-height: 1; /* 로고와 메시지 정렬 기준 통일 */
+  line-height: 1; 
 }
 .logo-text .highlight {
   color: #007aff; 
@@ -252,7 +248,21 @@ body {
   font-weight: 500;
   color: #666;
   margin-left: 10px;
-  /* ⭐ [수정] header-left의 align-items: center;를 따르도록 함 */
+}
+
+.profile-icon {
+  width: 45px; 
+  height: 45px;
+  object-fit: cover; 
+  flex-shrink: 0; 
+  
+  border-radius: 50%;
+  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));
+  transition: transform 0.2s ease;
+}
+.profile-icon:hover {
+  transform: scale(1.05);
+  cursor: pointer;
 }
 
 .auth-button {
@@ -885,7 +895,7 @@ body {
 }
 
 /* -----------------------------------------------------
- * 모달 내 라디오 버튼 그룹 스타일 (회원가입 모달)
+ * ⭐ 모달 내 가구/자녀 정보 입력 필드 스타일
  * ----------------------------------------------------- */
 
 .modal-form hr {
@@ -901,6 +911,7 @@ body {
     margin-bottom: 10px;
 }
 
+/* 라디오 버튼 그룹 기본 스타일 */
 .modal-form .radio-group {
     display: flex;
     justify-content: space-around;
@@ -909,8 +920,10 @@ body {
     padding: 10px;
     background-color: #f7f7f7;
     border-radius: 8px;
+    flex-wrap: wrap;
 }
 
+/* ⭐ [수정/보강] 자녀/학교 등 선택지를 3등분하여 수평으로 배치 (이미지처럼) */
 .modal-form .radio-group label {
     display: flex;
     align-items: center;
@@ -918,12 +931,104 @@ body {
     font-size: 15px;
     cursor: pointer;
     margin-bottom: 0;
+    /* ⭐ 수평 배치를 위해 너비 조정 */
+    width: auto; 
+    padding: 5px 10px;
 }
 
 .modal-form .radio-group input[type="radio"] {
     margin-right: 5px;
     width: 15px;
     height: 15px;
+}
+
+/* 이미지 스타일 구현을 위한 그룹 보강 */
+.modal-form .radio-group.horizontal-group {
+    justify-content: flex-start; 
+    gap: 20px; 
+    padding: 0; 
+    background-color: transparent;
+    border-radius: 0;
+}
+
+.modal-form .radio-group.vertical-group {
+    flex-direction: column; 
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px;
+    background-color: #f7f7f7;
+    border-radius: 8px;
+}
+
+/* 자녀 정보 그룹 (남/여, 생년월일이 수평으로 나란히 배치) */
+.modal-form .child-info-group {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 10px;
+    padding: 8px 0;
+    border-bottom: 1px dotted #eee; 
+}
+
+.modal-form .child-label {
+    font-size: 15px;
+    font-weight: 600;
+    color: #333;
+    flex-shrink: 0; 
+    min-width: 50px; /* 라벨 너비 확보 */
+}
+
+.modal-form .child-info-fields {
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
+    gap: 10px;
+}
+
+/* ⭐ [수정] 자녀 성별 그룹: 너비 좁게, 수평 유지 */
+.modal-form .child-gender-group {
+    gap: 10px;
+    margin-bottom: 0; 
+    padding: 0;
+    background-color: transparent;
+    flex-shrink: 0; /* 공간을 많이 차지하지 않도록 */
+}
+
+/* 자녀 생년월일 입력창 */
+.modal-form .child-dob-input {
+    flex-grow: 1;
+    padding: 8px; 
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 15px;
+    color: #555;
+    /* width: 100%; (child-info-fields 내부에서 flex-grow가 처리) */
+}
+
+/* 자녀 추가 버튼 */
+.modal-form .add-child-btn {
+    width: 120px;
+    padding: 8px 0;
+    border: 1px solid #ffcccc;
+    background-color: #fff;
+    color: #e6007e; 
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    margin-top: 5px;
+    align-self: flex-end; 
+    transition: background-color 0.1s;
+}
+
+.modal-form .add-child-btn:hover {
+    background-color: #fce7f6;
+}
+
+/* 자산 라디오 그룹 간격 조정 */
+.modal-form .asset-group label {
+    margin-right: 5px;
+    font-size: 14px;
 }
 
 /* -----------------------------------------------------
@@ -1166,7 +1271,6 @@ body {
     font-size: 16px;
   }
 
-  /* ⭐ [수정] 프로필 아이콘이 모바일에서도 깨지지 않도록 크기 고정 */
   .profile-icon {
     width: 40px; 
     height: 40px;
@@ -1190,7 +1294,7 @@ body {
   }
 }
 
-/* --- 애니메이션 키프레임 (스플래시 화면용) --- */
+/* --- 애니메이션 키프레임 --- */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -1207,7 +1311,6 @@ body {
     opacity: 1;
   }
   to {
-    /* ⭐ [수정] 사라질 때 투명도 0과 함께 완전히 숨김 처리 */
     opacity: 0;
     visibility: hidden; 
   }
