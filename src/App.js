@@ -18,7 +18,7 @@ const DUMMY_USERS = [
     gender: "male",
     schoolLevel: "고",
     highDetail: "일반",
-    Gu: "장안1동", // 이 값은 이제 구(Gu) 값으로 저장될 것입니다.
+    gu: "강남구", // 이 값은 이제 구(Gu) 값으로 저장될 것입니다.
   },
 ];
 
@@ -66,7 +66,7 @@ const SplashScreen = ({ onComplete }) => {
  * ----------------------------------------------------- */
 const UserBubble = ({ user, onClose }) => {
   // dong 대신 district를 사용할 수 있지만, 기존 구조 유지를 위해 변수명은 dong 유지
-  const { name, gender, schoolLevel, highDetail, dong: district } = user; 
+  const { name, gender, schoolLevel, highDetail, gu: district } = user; 
 
   const schoolText = `${schoolLevel} 학생${
     highDetail ? ` (${highDetail} 계열)` : ""
