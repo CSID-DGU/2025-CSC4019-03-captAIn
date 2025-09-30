@@ -45,7 +45,7 @@ const SplashScreen = ({ onComplete }) => {
   return (
     <div className="splash-screen">
       <img
-        src="/images/didimi-found.png"
+        src="/images/seoul_logo.png"
         alt="디디온 파운드 로고"
         className="splash-logo"
       />
@@ -1032,7 +1032,7 @@ function App() {
                   flex: 1,
                   width: "100%",
                   height: "100%",
-                  backgroundImage: 'url("/images/didimi-basic.png")',
+                  backgroundImage: 'url("/images/seoul_logo.png")',
                   backgroundSize: "50%",
                   backgroundPosition: "center",
                   backgroundRepeat: "no-repeat",
@@ -1095,7 +1095,7 @@ function App() {
             ) : (
               <div className="landing-container">
                 <img
-                  src="/images/didimi-default.png"
+                  src="/images/seoul_logo.png"
                   alt="디디온 로고"
                   className="landing-logo"
                 />

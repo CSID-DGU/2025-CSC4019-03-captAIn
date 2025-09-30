@@ -432,7 +432,7 @@ body {
   width: 200px;
   height: 200px;
   object-fit: contain;
-  margin-bottom: 15px;
+  margin-bottom: 2px;
   filter: drop-shadow(12px 12px 15px rgba(0, 0, 0, 0.15));
   animation: floatAnimation 3s ease-in-out infinite;
   transition: filter 0.3s ease-in-out;
