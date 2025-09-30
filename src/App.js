@@ -18,7 +18,7 @@ const DUMMY_USERS = [
     gender: "male",
     schoolLevel: "고",
     highDetail: "일반",
-    dong: "장안1동", // 이 값은 이제 구(Gu) 값으로 저장될 것입니다.
+    Gu: "장안1동", // 이 값은 이제 구(Gu) 값으로 저장될 것입니다.
   },
 ];
 

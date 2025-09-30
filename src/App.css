@@ -495,6 +495,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  padding-bottom: 10px; /* 마지막 메시지 아래 여백 추가 */
 }
 .message {
   display: flex;
@@ -609,7 +610,7 @@ body {
   }
 }
 
-/* --- 입력 폼 --- */
+/* --- 입력 폼 (채팅/랜딩 모드 전환) --- */
 .input-form-wrapper {
   width: 100%;
   padding-top: 20px;
@@ -617,33 +618,51 @@ body {
 }
 .input-form-container {
   width: 100%;
-  padding: 15px;
   border: 1px solid #e0e0e0;
   border-radius: 20px;
   background-color: #ffffff;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-  transition: padding 0.3s ease-out;
+  transition: all 0.3s ease-out; /* 전환 효과 추가 */
+}
+
+/* 랜딩 모드 (기본) 스타일 */
+.input-form-wrapper:not(.chat-mode) .input-form-container {
   display: flex; 
   flex-direction: column;
-}
-.input-form-wrapper.landing-mode .input-form-container {
   padding: 15px 30px;
   min-height: 140px; 
 }
-
-.form-header,
-.form-footer {
+.input-form-wrapper:not(.chat-mode) .form-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  flex-shrink: 0; 
-}
-.form-header {
   margin-bottom: 15px;
+  flex-shrink: 0;
 }
-.form-footer {
+.input-form-wrapper:not(.chat-mode) .form-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-top: 15px;
+  flex-shrink: 0;
 }
+
+/* 채팅 모드 스타일 */
+.input-form-wrapper.chat-mode .input-form-container {
+  display: flex;
+  align-items: center;
+  padding: 8px 8px 8px 20px; /* 패딩 축소 */
+  min-height: auto;
+}
+.input-form-wrapper.chat-mode .form-header {
+    display: none; /* 채팅 모드에서 숨김 */
+}
+.input-form-wrapper.chat-mode .form-footer {
+    margin-top: 0; /* 여백 제거 */
+    margin-left: 10px; /* 텍스트 입력과의 간격 확보 */
+}
+
+
 .ai-badge {
   font-size: 14px;
   font-weight: 500;
@@ -667,6 +686,7 @@ body {
   font-family: inherit;
   max-height: 200px;
   flex-grow: 1; 
+  padding: 5px 0; /* 내부 텍스트 상하 패딩 */
 }
 .submit-button {
   width: 36px;
@@ -697,15 +717,7 @@ body {
   height: 18px;
   animation: spin 1s ease-in-out infinite;
 }
-.input-form-wrapper.chat-mode .input-form-container {
-  display: flex;
-  align-items: center;
-  padding: 8px 8px 8px 20px;
-}
-.input-form-wrapper.chat-mode .form-footer {
-  margin-top: 0;
-  margin-left: 10px;
-}
+
 
 /* --- 문의하기 버튼 및 모달 스타일 --- */
 .fab-contact {
@@ -895,7 +907,7 @@ body {
 }
 
 /* -----------------------------------------------------
- * ⭐ 모달 내 가구/자녀 정보 입력 필드 스타일
+ * ⭐ 모달 내 가구/자녀 정보 입력 필드 스타일 (개선)
  * ----------------------------------------------------- */
 
 .modal-form hr {
@@ -914,8 +926,8 @@ body {
 /* 라디오 버튼 그룹 기본 스타일 */
 .modal-form .radio-group {
     display: flex;
-    justify-content: space-around;
-    gap: 10px;
+    justify-content: flex-start; /* 좌측 정렬 */
+    gap: 15px;
     margin-bottom: 15px;
     padding: 10px;
     background-color: #f7f7f7;
@@ -923,7 +935,7 @@ body {
     flex-wrap: wrap;
 }
 
-/* ⭐ [수정/보강] 자녀/학교 등 선택지를 3등분하여 수평으로 배치 (이미지처럼) */
+/* 라디오 버튼 라벨 스타일 */
 .modal-form .radio-group label {
     display: flex;
     align-items: center;
@@ -931,9 +943,8 @@ body {
     font-size: 15px;
     cursor: pointer;
     margin-bottom: 0;
-    /* ⭐ 수평 배치를 위해 너비 조정 */
     width: auto; 
-    padding: 5px 10px;
+    padding: 5px 0;
 }
 
 .modal-form .radio-group input[type="radio"] {
@@ -942,15 +953,15 @@ body {
     height: 15px;
 }
 
-/* 이미지 스타일 구현을 위한 그룹 보강 */
+/* 가로 정렬 그룹 (자녀, 학교 등 선택 시) */
 .modal-form .radio-group.horizontal-group {
-    justify-content: flex-start; 
-    gap: 20px; 
     padding: 0; 
     background-color: transparent;
     border-radius: 0;
+    justify-content: flex-start;
 }
 
+/* 세로 정렬 그룹 (예: 주택 소유 여부) */
 .modal-form .radio-group.vertical-group {
     flex-direction: column; 
     align-items: flex-start;
@@ -960,14 +971,29 @@ body {
     border-radius: 8px;
 }
 
-/* 자녀 정보 그룹 (남/여, 생년월일이 수평으로 나란히 배치) */
+/* 자녀 정보 그룹 (여러 자녀 정보 필드) */
+.modal-form .child-group-wrapper {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    background-color: #fff;
+}
+
+/* 개별 자녀 정보 필드 라인 */
 .modal-form .child-info-group {
     display: flex;
+    flex-wrap: wrap; /* 모바일 대응 */
     align-items: center;
-    gap: 15px;
+    gap: 10px;
     margin-bottom: 10px;
-    padding: 8px 0;
+    padding-bottom: 10px;
     border-bottom: 1px dotted #eee; 
+}
+.modal-form .child-info-group:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
 }
 
 .modal-form .child-label {
@@ -975,61 +1001,69 @@ body {
     font-weight: 600;
     color: #333;
     flex-shrink: 0; 
-    min-width: 50px; /* 라벨 너비 확보 */
+    min-width: 60px; /* 라벨 너비 확보 */
 }
 
-.modal-form .child-info-fields {
-    display: flex;
-    align-items: center;
-    flex-grow: 1;
-    gap: 10px;
-}
-
-/* ⭐ [수정] 자녀 성별 그룹: 너비 좁게, 수평 유지 */
+/* 자녀 성별 그룹: 너비 좁게, 수평 유지 */
 .modal-form .child-gender-group {
-    gap: 10px;
+    display: flex;
+    gap: 15px;
     margin-bottom: 0; 
     padding: 0;
     background-color: transparent;
-    flex-shrink: 0; /* 공간을 많이 차지하지 않도록 */
+    flex-shrink: 0; 
+    flex-grow: 1; /* 남은 공간 활용 */
 }
 
 /* 자녀 생년월일 입력창 */
 .modal-form .child-dob-input {
     flex-grow: 1;
+    min-width: 120px; /* 입력 필드 최소 너비 확보 */
     padding: 8px; 
     border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 15px;
     color: #555;
-    /* width: 100%; (child-info-fields 내부에서 flex-grow가 처리) */
 }
 
-/* 자녀 추가 버튼 */
-.modal-form .add-child-btn {
-    width: 120px;
-    padding: 8px 0;
-    border: 1px solid #ffcccc;
-    background-color: #fff;
-    color: #e6007e; 
+/* 자녀 추가/삭제 버튼 그룹 */
+.modal-form .child-action-group {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.modal-form .add-child-btn,
+.modal-form .remove-child-btn {
+    padding: 8px 12px;
     border-radius: 4px;
     cursor: pointer;
     font-size: 14px;
     font-weight: 600;
-    margin-top: 5px;
-    align-self: flex-end; 
     transition: background-color 0.1s;
 }
 
+/* 자녀 추가 버튼 */
+.modal-form .add-child-btn {
+    border: 1px solid #007aff;
+    background-color: #007aff;
+    color: white; 
+}
 .modal-form .add-child-btn:hover {
-    background-color: #fce7f6;
+    background-color: #0056b3;
 }
 
-/* 자산 라디오 그룹 간격 조정 */
-.modal-form .asset-group label {
-    margin-right: 5px;
-    font-size: 14px;
+/* 자녀 삭제 버튼 */
+.modal-form .remove-child-btn {
+    border: 1px solid #dc3545;
+    background-color: #fff;
+    color: #dc3545; 
 }
+.modal-form .remove-child-btn:hover {
+    background-color: #f8d7da;
+}
+
 
 /* -----------------------------------------------------
  * FAQList 스타일
@@ -1152,10 +1186,10 @@ body {
   transition: all 0.2s ease-in-out;
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); 
   cursor: pointer;
+  overflow: hidden; /* 호버 배경을 위해 추가 */
 }
 
 .faq-item-button:hover { 
-  background: linear-gradient(to right, #fdf2f8, #f5f3ff); 
   border-color: #fbcfe8; 
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
   transform: translateY(-2px);
@@ -1248,6 +1282,7 @@ body {
   color: #6b7280; 
 }
 
+
 /* --- 반응형 스타일 (기존 코드 유지) --- */
 @media (max-width: 768px) {
   .app-header {
@@ -1287,6 +1322,25 @@ body {
 
   .contact-modal-content {
     max-height: 95vh;
+  }
+  
+  /* 모바일에서 자녀 정보 입력 필드 재정렬 */
+  .modal-form .child-info-group {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .modal-form .child-label {
+    margin-bottom: 5px;
+  }
+  .modal-form .child-gender-group {
+      width: 100%;
+      justify-content: space-around;
+      padding: 5px 0;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+  }
+  .modal-form .child-dob-input {
+      width: 100%;
   }
 
   .fab-contact {
