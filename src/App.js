@@ -22,6 +22,12 @@ const DUMMY_USERS = [
   },
 ];
 
+const DUMMY_NOTICES = [
+  { id: 1, title: "임신육아종합포털 아이사랑", link: "https://www.childcare.go.kr/?menuno=1"},
+  { id: 2, title: "10월 정책 지원 사업 일정 공지" },
+  { id: 3, title: "개인정보 처리 방침 변경 사항" },
+];
+
 // ⭐ [추가] 서울시 25개 구 목록
 const SEOUL_DISTRICTS = [
   "강남구", "강동구", "강북구", "강서구", "관악구", "광진구", "구로구", 
@@ -561,8 +567,13 @@ const LandingFAQModal = ({ onClose, onSelect }) => {
 
 
 /* -----------------------------------------------------
+ /* -----------------------------------------------------
  * 6. 사이드바 컴포넌트
  * ----------------------------------------------------- */
+// ⭐ 중요: 이 컴포넌트가 있는 파일 상단이나 외부에 DUMMY_NOTICES를 선언해야 합니다.
+// (예: const DUMMY_NOTICES = [ { id: 1, title: "[공지]..." } ]; )
+// 현재는 DUMMY_NOTICES가 없다고 가정하고 빈 배열로 임시 처리했습니다.
+
 const Sidebar = ({ isOpen, onClose, onNewChat, messages }) => {
   const chatHistory = messages.filter(msg => msg.type === 'user' && !msg.typing)
                             .map(msg => msg.text)
@@ -603,6 +614,28 @@ const Sidebar = ({ isOpen, onClose, onNewChat, messages }) => {
             )}
           </div>
           
+          {/* ⭐ [추가된 게시판 섹션] */}
+
+          <div className="sidebar-notice">
+            <h5>포털 사이트</h5>
+            {DUMMY_NOTICES.length > 0 ? (
+              <ul>
+                {DUMMY_NOTICES.map((item) => (
+                  <li 
+                      key={item.id} 
+                      title={item.title}
+                      // ❗ onClick 이벤트 수정: 새 창에서 item.link로 이동
+                      onClick={() => window.open(item.link, '_blank')} 
+                  >
+                    {item.title.substring(0, 30)}...
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="no-content">새로운 공지사항이 없습니다.</p>
+            )}
+          </div>
+
           <div className="sidebar-settings">
             <h5>설정</h5>
             <p className="no-history">개인 설정 및 가이드</p>
@@ -612,7 +645,6 @@ const Sidebar = ({ isOpen, onClose, onNewChat, messages }) => {
     </>
   );
 };
-
 
 /* -----------------------------------------------------
  * 7. 메인 App 컴포넌트

@@ -239,6 +239,42 @@ body {
     font-size: 14px;
 }
 
+/* [추가] 게시판 섹션 헤더 스타일 */
+.sidebar-notice h5 {
+  font-size: 14px;
+  font-weight: 700;
+  color: #555;
+  margin-top: 15px; /* 최근 질문 섹션과의 간격 확보 */
+  margin-bottom: 10px;
+  padding-bottom: 5px;
+  border-bottom: 1px dashed #e0e0e0;
+}
+
+/* [추가] 게시판 목록 스타일 */
+.sidebar-notice ul {
+  list-style: none;
+  padding: 0;
+}
+.sidebar-notice li {
+  font-size: 14px;
+  color: #333;
+  padding: 8px 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  border-bottom: 1px solid #eeeeee; /* 항목 구분선 추가 */
+}
+.sidebar-notice li:last-child {
+  border-bottom: none; /* 마지막 항목의 구분선 제거 */
+}
+.sidebar-notice li:hover {
+  background-color: #e0e0e0;
+}
+.sidebar-notice p.no-content {
+  color: #888;
+  font-size: 14px;
+}
 /* -----------------------------------------------------
  * 기존 스타일 (Auth, Modals, Chat, Landing)
  * ----------------------------------------------------- */
