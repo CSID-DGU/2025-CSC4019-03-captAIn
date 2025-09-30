@@ -1128,7 +1128,7 @@ function App() {
               <div className="landing-container">
                 <img
                   src="/images/seoul_logo.png"
-                  alt="디디온 로고"
+                  alt="서울아이 로고"
                   className="landing-logo"
                 />
                 <div className="text-container">
