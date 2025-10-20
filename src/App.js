@@ -23,9 +23,10 @@ const DUMMY_USERS = [
 ];
 
 const DUMMY_NOTICES = [
-  { id: 1, title: "임신육아종합포털 아이사랑", link: "https://www.childcare.go.kr/?menuno=1"},
-  { id: 2, title: "10월 정책 지원 사업 일정 공지" },
-  { id: 3, title: "개인정보 처리 방침 변경 사항" },
+  { id: 1, title: "e보건소 임산부 지원(온라인 보건 서비스)", link: "https://www.e-health.go.kr/gh/caSrvcGud/selectParSupGudInfo.do?appFlg=02&menuId=200004" },
+  { id: 2, title: "임신육아종합포털 아이사랑", link: "https://www.childcare.go.kr/?menuno=1"},
+  { id: 3, title: "아이돌봄 서비스", link : "https://www.idolbom.go.kr/front/" },
+  { id: 4, title: "개인정보 처리 방침 변경 사항" },
 ];
 
 // ⭐ [추가] 서울시 25개 구 목록
@@ -52,11 +53,11 @@ const SplashScreen = ({ onComplete }) => {
     <div className="splash-screen">
       <img
         src="/images/seoul_logo.png"
-        alt="디디온 파운드 로고"
+        alt="서울시 로고"
         className="splash-logo"
       />
       <h1 className="splash-title">SEOUL-AI</h1>
-      <p className="splash-description">Your AI Parenting Navigator.</p>
+      <p className="splash-description">우리아이 임신 및 양육 AI챗봇</p>
       <div className="loading-spinner"></div>
       <p className="splash-text">
         서울아이가 여러분을 찾아가는 중입니다...
@@ -1133,7 +1134,7 @@ function App() {
                 />
                 <div className="text-container">
                   <p className="subtitle">Your AI Parenting Navigator.</p>
-                  <h1 className="title">서울아이에게 물어보세요</h1>
+                  <h1 className="title">서울시 임신 및 양육 정책 AI 챗봇</h1>
                 </div>
 
                 <div className="quick-start-buttons">
@@ -1206,7 +1207,7 @@ function App() {
                     isLoggedIn
                       ? isChatStarted
                         ? "질문을 입력하세요..."
-                        : "동대문구의 교육 정보, 진로 탐색 등 무엇이든 물어보세요!"
+                        : "임신 및 양육 정책 등 무엇이든 물어보세요!"
                       : "로그인 후 질문을 입력해주세요."
                   }
                   className="idea-textarea"
