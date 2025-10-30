@@ -579,6 +579,7 @@ body {
   padding: 0;
   opacity: 0.4;
   transition: all 0.2s ease;
+  position: relative; /* 툴팁을 위해 필요 */
 }
 
 .feedback-btn:hover {
@@ -595,6 +596,43 @@ body {
   height: 25px;
   display: block;
 }
+
+/* --- 툴팁 추가 --- */
+.feedback-btn .tooltip {
+  position: absolute;
+  bottom: 130%; /* 버튼 위쪽에 위치 */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #333;
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 10;
+}
+
+.feedback-btn:hover .tooltip {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-5px); /* 살짝 떠 있는 느낌 */
+}
+
+/* 툴팁 삼각형 */
+.feedback-btn .tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%; /* 말풍선 아래쪽 */
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 5px;
+  border-style: solid;
+  border-color: #333 transparent transparent transparent;
+}
+
+
 
 .link-button {
   display: inline-block;
@@ -775,14 +813,42 @@ body {
 }
 
 .fab-contact img {
-  width: 100%;
-  height: 100%;
+  width: 150%;
+  height: 1500%;
   object-fit: contain;
   border-radius: 0;
 }
 
 .fab-contact:hover {
   transform: scale(1.1) rotate(15deg);
+}
+
+/* 항상 보이는 말풍선 */
+.tooltip-text {
+  position: absolute;
+  bottom: 75px; /* 버튼 위로 띄우기 */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #333;
+  color: white;
+  text-align: center;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  white-space: nowrap;
+  opacity: 1;
+}
+
+/* 꼬리(삼각형) */
+.tooltip-text::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #333 transparent transparent transparent;
 }
 
 .contact-modal-overlay {

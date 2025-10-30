@@ -1101,6 +1101,7 @@ function App() {
                                   src="/images/like-button.png"
                                   alt="도움돼요"
                                 />
+                                 <span className="tooltip">도움돼요</span> {/* ← 여기 */}
                               </button>
                               <button
                                 className={`feedback-btn ${
@@ -1115,6 +1116,7 @@ function App() {
                                   src="/images/thumbs-down.png"
                                   alt="도움 안돼요"
                                 />
+                                <span className="tooltip">도움 안돼요</span> {/* ← 여기 */}
                               </button>
                             </div>
                           )}
@@ -1233,8 +1235,9 @@ function App() {
           </main>
 
           <button className="fab-contact" onClick={toggleContactModal}>
-            <img src="/images/ddon_ask.png" alt="문의하기" />
-          </button>
+  <img src="/images/ddon_ask.png" alt="문의하기" />
+  <span className="tooltip-text">1:1 문의하기</span>
+</button>
 
           {isContactModalOpen && <ContactModal onClose={toggleContactModal} />}
           
