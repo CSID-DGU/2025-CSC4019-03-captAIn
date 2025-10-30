@@ -16,8 +16,6 @@ const DUMMY_USERS = [
     password: "password123", // 실제로는 해싱됨
     name: "김철수",
     gender: "male",
-    schoolLevel: "고",
-    highDetail: "일반",
     gu: "강남구", // 이 값은 이제 구(Gu) 값으로 저장될 것입니다.
   },
 ];
@@ -72,26 +70,88 @@ const SplashScreen = ({ onComplete }) => {
  * 2. 사용자 정보 출력 (UserBubble)
  * ----------------------------------------------------- */
 const UserBubble = ({ user, onClose }) => {
-  // dong 대신 district를 사용할 수 있지만, 기존 구조 유지를 위해 변수명은 dong 유지
-  const { name, gender, schoolLevel, highDetail, gu: district } = user; 
+  // 기존 정보
+  const { 
+    name, 
+    gender, 
+    schoolLevel, 
+    highDetail, 
+    gu: district, 
+    
+    // ⭐ [추가] 회원가입 시 추가된 정보 구조 분해 할당
+    hasChild, 
+    isPregnant, 
+    familyType, 
+    incomeLevel, 
+    assetLevel, 
+    jobStatus, 
+    housingType, 
+    hasDisability,
+    children // 자녀 배열
+  } = user; 
 
-  const schoolText = `${schoolLevel} 학생${
-    highDetail ? ` (${highDetail} 계열)` : ""
-  }`;
+  const schoolText = schoolLevel 
+    ? `${schoolLevel} 학생${highDetail ? ` (${highDetail} 계열)` : ""}`
+    : "정보 없음";
+
 
   return (
-    <div className="user-bubble">
-      <h3>{name} 님의 정보</h3>
+    <div className="user-bubble" style={{ maxWidth: '300px' }}> {/* 스타일 추가 */}
+      <h3>{name} 님의 상세 정보</h3>
+      
+      {/* ------------------- 가구 정보 ------------------- */}
       <p>
-        <strong>성별:</strong> {gender === "male" ? "남" : "여"}
+        <strong>거주 지역:</strong> {district || '미입력'}
       </p>
       <p>
-        <strong>학교:</strong> {schoolText}
+        <strong>가구 유형:</strong> {familyType || '미입력'}
       </p>
-      {/* ⭐ [수정] 거주 지역을 구(District)로 표시 */}
       <p>
-        <strong>거주 지역:</strong> {district}
+        <strong>소득 수준:</strong> {incomeLevel || '미입력'}
       </p>
+      <p>
+        <strong>자산 수준:</strong> {assetLevel || '미입력'}
+      </p>
+      <p>
+        <strong>주거 형태:</strong> {housingType || '미입력'}
+      </p>
+      <p>
+        <strong>직업 상태:</strong> {jobStatus || '미입력'}
+      </p>
+      <p>
+        <strong>장애 여부:</strong> {hasDisability || '미입력'}
+      </p>
+
+      {/* ------------------- 임신/출산 정보 ------------------- */}
+      <p>
+        <strong>임신 여부:</strong> {isPregnant || '미입력'}
+      </p>
+      <p>
+        <strong>자녀 유무:</strong> {hasChild || '미입력'}
+      </p>
+
+      {/* ------------------- 자녀 정보 (children 배열) ------------------- */}
+      {hasChild === '유' && children && children.length > 0 && (
+          <div>
+            <hr style={{ margin: '10px 0' }} />
+            <strong>등록된 자녀 ({children.length}명)</strong>
+            {children.map((child, index) => (
+                <p key={index} style={{ margin: '5px 0', fontSize: '0.9em' }}>
+                    * 자녀 {index + 1}: {child.gender || '성별 미입력'} / {child.dob || '생년월일 미입력'}
+                </p>
+            ))}
+          </div>
+      )}
+
+      {/* ------------------- 기존 자녀 (첫째) 정보 (하위 호환성 및 기존 데이터 유지) ------------------- */}
+      <hr style={{ margin: '10px 0' }} />
+      <p>
+        <strong>(기존) 자녀 성별:</strong> {gender === "male" ? "남" : gender === "female" ? "여" : '미입력'}
+      </p>
+      <p>
+        <strong>(기존) 자녀 학교:</strong> {schoolText}
+      </p>
+      
       <div style={{ marginTop: "10px" }}>
         <button onClick={onClose} className="submit-btn">
           닫기
@@ -769,14 +829,34 @@ function App() {
 
     setLoading(true);
 
-    // 질문-답변 쌍 (DEMO_RESPONSES)
-    const DEMO_RESPONSES = {
-      "독서실 추천": `동대문구에서 운영하는 구립 청소년독서실을 추천드리겠습니다. ... (내용 생략) ...`,
-      "동대문구 고등학교 목록": `동대문구에 위치한 고등학교 목록을 안내해드리겠습니다. ... (내용 생략) ...`,
-      "청소년 상담 프로그램": `동대문구에서 운영하는 청소년 상담 프로그램을 안내해드리겠습니다. ... (내용 생략) ...`,
-      "학습 코칭 신청": `안녕하세요! 동대문구 교육지원센터에서 운영하는 학습 코칭 프로그램에 대해 안내해드리겠습니다. ... (내용 생략) ...`,
-      "방과후 뭐있어?": `안녕하세요! 동대문구에서 운영하는 방과후 프로그램을 안내해드리겠습니다. ... (내용 생략) ...`,
-      "나 중학생인데 컴퓨터 관심있어": `안녕하세요! 컴퓨터에 관심이 있는 중학생이시군요. 동대문구에서 운영하는 컴퓨터 관련 교육 프로그램들을 소개해드릴게요. ... (내용 생략) ...`,
+   // 질문-답변 쌍 (DEMO_RESPONSES)
+   const DEMO_RESPONSES = {
+
+    "산모신생아 건강관리": {
+      title: "🤱 산모·신생아 건강관리 지원사업 (산후도우미)",
+      summary: "출산 가정을 대상으로 건강관리사를 파견하여 산모의 산후 회복과 신생아 양육을 지원하는 서비스입니다. 출산 가정의 경제적 부담 경감이 목적입니다.",
+      details: [
+          "**지원 대상:** 산모와 배우자의 건강보험료 합산액이 **기준 중위소득 150% 이하**인 출산 가정 (소득 기준 초과 시 지자체별 예외 지원 가능)",
+          "**지원 기간:** 태아 유형(단태아/다태아) 및 서비스 기간 선택에 따라 **5일~40일**까지 차등 지원됩니다.",
+          "**지원 내용:** 산모 건강관리(유방, 체조), 신생아 건강관리(목욕, 수유), 산모 식사 준비, 세탁물 및 청소 등 (단, 다른 가족 돌봄이나 일반 가사 활동은 부가 서비스로 별도 구매 필요)",
+          "**신청:** 출산 예정일 40일 전부터 출산일로부터 30일 이내에 주소지 관할 **보건소** 또는 **복지로**를 통해 신청합니다."
+      ],
+      // 👇 요청하신 정부24의 산모·신생아 건강관리 지원사업 링크로 수정 반영
+      link: "https://www.gov.kr/mw/AA020InfoCappView.do?CappBizCD=13520000043"
+    }, 
+    
+    "출산 준비 및 계획": {
+        title: "🤰 출산 준비 및 계획",
+        summary: "건강한 출산과 준비를 돕기 위해 임신 전부터 출산 직전까지 다양한 의료 및 현물 지원이 이루어집니다.",
+        details: [
+            "**임신·출산 진료비 지원:** 국민행복카드 바우처 지급 (단태아 100만원, 다태아 140만원 → **2024년 기준 쌍둥이 200만원, 세쌍둥이 300만원 등 증액**)",
+            "**임신 사전 건강관리:** 임신을 희망하는 가임기 남녀에게 난소기능검사(여성), 정액검사(남성) 등 **가임력 검사 비용**을 지원합니다. (보건소 신청)",
+            "**엽산제/철분제 지급:** 임신 초기에는 엽산제를, 임신 16주 이후에는 철분제를 관할 **보건소**에서 지원받을 수 있습니다.",
+            "**출산휴가 및 근로시간 단축:** 근로자는 출산 전후 휴가와 임신기 근로시간 단축 제도(임신 12주 이내, 32주 이후 1일 2시간)를 활용할 수 있습니다."
+        ],
+        // 보건복지부의 임신·출산 지원 정책 종합 페이지 링크 유지
+        link: "https://www.mohw.go.kr/menu.es?mid=a10711020100" 
+    },
       
       // FAQList 항목의 답변
       "출산 지원금 알려줘": `[서울시 출산 지원금]
@@ -808,11 +888,22 @@ function App() {
 
     if (DEMO_RESPONSES[messageToSend]) {
       await new Promise((resolve) => setTimeout(resolve, 3500));
+      
+      const responseContent = DEMO_RESPONSES[messageToSend];
+
+      let formattedText;
+      if (typeof responseContent === 'object' && responseContent.title) {
+          // 💡 수정: 객체 답변을 포맷된 문자열로 변환합니다. (오류 해결)
+          formattedText = `**${responseContent.title}**\n\n${responseContent.summary}\n\n**상세 내용:**\n${responseContent.details.join('\n')}\n\n**🔗 정보 확인:** ${responseContent.link}`;
+      } else {
+          // 문자열 답변은 그대로 사용
+          formattedText = responseContent;
+      }
 
       const demoResponse = {
         id: Date.now() + 2,
         type: "bot",
-        text: DEMO_RESPONSES[messageToSend],
+        text: formattedText, // <--- 수정: 포맷된 문자열을 사용합니다.
         feedback: null,
       };
 
@@ -874,6 +965,12 @@ function App() {
   };
 
   const renderMessageContent = (text) => {
+    // 💡 수정: text가 문자열이 아닐 경우 문자열로 강제 변환하여 오류 방지
+    if (typeof text !== 'string') {
+        // console.error("renderMessageContent received non-string data:", text); // 디버깅용
+        return String(text); 
+    }
+
     const urlRegex = /(https?:\/\/[^\s\)]+)/g;
     if (!text.match(urlRegex)) {
       return text;
@@ -1140,36 +1237,25 @@ function App() {
                 </div>
 
                 <div className="quick-start-buttons">
+                
                   <button
-                    onClick={() => handleSubmit(null, "독서실 추천")}
+                    onClick={() => handleSubmit(null, "출산 준비 및 계획")}
                     className="quick-start-btn"
                   >
-                    #독서실
+                    #출산 준비 및 계획
                   </button>
+
+                
                   <button
-                    onClick={() => handleSubmit(null, "동대문구 고등학교 목록")}
+                    // 💡 수정: 질문 오타 수정 ("신모신생아" -> "산모신생아")
+                    onClick={() => handleSubmit(null, "산모신생아 건강관리")} 
                     className="quick-start-btn"
                   >
-                    #학교 정보
+                    #산모신생아 건강관리
                   </button>
-                  <button
-                    onClick={() => handleSubmit(null, "청소년 상담 프로그램")}
-                    className="quick-start-btn"
-                  >
-                    #상담지원
-                  </button>
-                  <button
-                    onClick={() => handleSubmit(null, "학습 코칭 신청")}
-                    className="quick-start-btn"
-                  >
-                    #학습지원
-                  </button>
-                  <button
-                    onClick={() => handleSubmit(null, "방과후 뭐있어?")}
-                    className="quick-start-btn"
-                  >
-                    #방과후
-                  </button>
+              
+  
+              
                   {/* 랜딩 페이지 FAQ 버튼 (퀵 스타트 버튼 목록에 통합) */}
                   <button
                     onClick={() => setIsLandingFAQModalOpen(true)}
