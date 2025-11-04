@@ -54,7 +54,7 @@ const SplashScreen = ({ onComplete }) => {
         alt="서울시 로고"
         className="splash-logo"
       />
-      <h1 className="splash-title">SEOUL-AI</h1>
+      <h1 className="splash-title">SEOUL-I</h1>
       <p className="splash-description">우리아이 임신 및 양육 AI챗봇</p>
       <div className="loading-spinner"></div>
       <p className="splash-text">
@@ -74,7 +74,6 @@ const UserBubble = ({ user, onClose }) => {
   const { 
     name, 
     gender, 
-    schoolLevel, 
     highDetail, 
     gu: district, 
     
@@ -89,10 +88,6 @@ const UserBubble = ({ user, onClose }) => {
     hasDisability,
     children // 자녀 배열
   } = user; 
-
-  const schoolText = schoolLevel 
-    ? `${schoolLevel} 학생${highDetail ? ` (${highDetail} 계열)` : ""}`
-    : "정보 없음";
 
 
   return (
@@ -141,16 +136,7 @@ const UserBubble = ({ user, onClose }) => {
                 </p>
             ))}
           </div>
-      )}
-
-      {/* ------------------- 기존 자녀 (첫째) 정보 (하위 호환성 및 기존 데이터 유지) ------------------- */}
-      <hr style={{ margin: '10px 0' }} />
-      <p>
-        <strong>(기존) 자녀 성별:</strong> {gender === "male" ? "남" : gender === "female" ? "여" : '미입력'}
-      </p>
-      <p>
-        <strong>(기존) 자녀 학교:</strong> {schoolText}
-      </p>
+      )}  
       
       <div style={{ marginTop: "10px" }}>
         <button onClick={onClose} className="submit-btn">
@@ -563,29 +549,6 @@ const SignupModal = ({ onClose, onSignupSuccess }) => {
               <label><input type="radio" name="gender" value="female" checked={gender === "female"} onChange={(e) => setGender(e.target.value)} />여</label>
             </div>
             
-            {/* 학교 */}
-            <p style={{ marginTop: "10px" }}>
-              <strong>학교 (첫째 기준, 기존 데이터)</strong>
-            </p>
-            <div className="radio-group">
-              <label><input type="radio" name="schoolLevel" value="초" checked={schoolLevel === "초"} onChange={(e) => setSchoolLevel(e.target.value)} />초등학생</label>
-              <label><input type="radio" name="schoolLevel" value="중" checked={schoolLevel === "중"} onChange={(e) => setSchoolLevel(e.target.value)} />중학생</label>
-              <label><input type="radio" name="schoolLevel" value="고" checked={schoolLevel === "고"} onChange={(e) => setSchoolLevel(e.target.value)} />고등학생</label>
-            </div>
-
-            {/* '고'를 선택했을 때만 나타나는 계열 선택 */}
-            {schoolLevel === "고" && (
-              <>
-                <p style={{ marginTop: "10px" }}>
-                  <strong>계열</strong>
-                </p>
-                <div className="radio-group">
-                  <label><input type="radio" name="highDetail" value="일반" checked={highDetail === "일반"} onChange={(e) => setHighDetail(e.target.value)} />일반</label>
-                  <label><input type="radio" name="highDetail" value="예체능" checked={highDetail === "예체능"} onChange={(e) => setHighDetail(e.target.value)} />예체능</label>
-                  <label><input type="radio" name="highDetail" value="실업계" checked={highDetail === "실업계"} onChange={(e) => setHighDetail(e.target.value)} />실업계</label>
-                </div>
-              </>
-            )}
 
             {error && <p className="error-message">{error}</p>}
 
@@ -1131,7 +1094,7 @@ function App() {
                 className="logo-text"
                 onClick={() => setMessages([])}
                 style={{ cursor: "pointer" }}
-              >SEOUL<span className="highlight">-AI</span>
+              >SEOUL<span className="highlight">-I</span>
               </span>
               {isLoggedIn && (
                 <span className="welcome-message">
