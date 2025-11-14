@@ -54,7 +54,7 @@ const SplashScreen = ({ onComplete }) => {
         alt="서울시 로고"
         className="splash-logo"
       />
-      <h1 className="splash-title">SEOUL-AI</h1>
+      <h1 className="splash-title">SEOUL-I</h1>
       <p className="splash-description">우리아이 임신 및 양육 AI챗봇</p>
       <div className="loading-spinner"></div>
       <p className="splash-text">
@@ -1131,7 +1131,7 @@ function App() {
                 className="logo-text"
                 onClick={() => setMessages([])}
                 style={{ cursor: "pointer" }}
-              >SEOUL<span className="highlight">-AI</span>
+              >SEOUL<span className="highlight">-I</span>
               </span>
               {isLoggedIn && (
                 <span className="welcome-message">
@@ -1250,8 +1250,8 @@ function App() {
                   className="landing-logo"
                 />
                 <div className="text-container">
-                  <p className="subtitle">Your AI Parenting Navigator.</p>
-                  <h1 className="title">서울시 임신 및 양육 정책 AI 챗봇</h1>
+                  <p className="subtitle">서울의 모든 출산·보육·교육 혜택을 한눈에 확인하세요</p>
+                  <h2 className="title">AI가 알려주는 우리 가족 맞춤 육아 정보</h2>
                 </div>
 
                 <div className="quick-start-buttons">
