@@ -3,6 +3,9 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import FAQList from './components/interactive/FAQList'; 
 import "./App.css";
 
+// ⭐ [추가] 개인정보 처리 방침 모달 import
+import PrivacyPolicyModal from './PrivacyPolicyModal'; 
+
 // API 엔드포인트
 const API_URL = process.env.REACT_APP_API_ENDPOINT || "YOUR_API_GATEWAY_URL";
 
@@ -24,7 +27,6 @@ const DUMMY_NOTICES = [
   { id: 1, title: "e보건소 임산부 지원(온라인 보건 서비스)", link: "https://www.e-health.go.kr/gh/caSrvcGud/selectParSupGudInfo.do?appFlg=02&menuId=200004" },
   { id: 2, title: "임신육아종합포털 아이사랑", link: "https://www.childcare.go.kr/?menuno=1"},
   { id: 3, title: "아이돌봄 서비스", link : "https://www.idolbom.go.kr/front/" },
-  { id: 4, title: "개인정보 처리 방침 변경 사항" },
 ];
 
 // ⭐ [추가] 서울시 25개 구 목록
@@ -74,7 +76,6 @@ const UserBubble = ({ user, onClose }) => {
   const { 
     name, 
     gender, 
-    schoolLevel, 
     highDetail, 
     gu: district, 
     
@@ -89,10 +90,6 @@ const UserBubble = ({ user, onClose }) => {
     hasDisability,
     children // 자녀 배열
   } = user; 
-
-  const schoolText = schoolLevel 
-    ? `${schoolLevel} 학생${highDetail ? ` (${highDetail} 계열)` : ""}`
-    : "정보 없음";
 
 
   return (
@@ -141,16 +138,7 @@ const UserBubble = ({ user, onClose }) => {
                 </p>
             ))}
           </div>
-      )}
-
-      {/* ------------------- 기존 자녀 (첫째) 정보 (하위 호환성 및 기존 데이터 유지) ------------------- */}
-      <hr style={{ margin: '10px 0' }} />
-      <p>
-        <strong>(기존) 자녀 성별:</strong> {gender === "male" ? "남" : gender === "female" ? "여" : '미입력'}
-      </p>
-      <p>
-        <strong>(기존) 자녀 학교:</strong> {schoolText}
-      </p>
+      )}  
       
       <div style={{ marginTop: "10px" }}>
         <button onClick={onClose} className="submit-btn">
@@ -563,29 +551,6 @@ const SignupModal = ({ onClose, onSignupSuccess }) => {
               <label><input type="radio" name="gender" value="female" checked={gender === "female"} onChange={(e) => setGender(e.target.value)} />여</label>
             </div>
             
-            {/* 학교 */}
-            <p style={{ marginTop: "10px" }}>
-              <strong>학교 (첫째 기준, 기존 데이터)</strong>
-            </p>
-            <div className="radio-group">
-              <label><input type="radio" name="schoolLevel" value="초" checked={schoolLevel === "초"} onChange={(e) => setSchoolLevel(e.target.value)} />초등학생</label>
-              <label><input type="radio" name="schoolLevel" value="중" checked={schoolLevel === "중"} onChange={(e) => setSchoolLevel(e.target.value)} />중학생</label>
-              <label><input type="radio" name="schoolLevel" value="고" checked={schoolLevel === "고"} onChange={(e) => setSchoolLevel(e.target.value)} />고등학생</label>
-            </div>
-
-            {/* '고'를 선택했을 때만 나타나는 계열 선택 */}
-            {schoolLevel === "고" && (
-              <>
-                <p style={{ marginTop: "10px" }}>
-                  <strong>계열</strong>
-                </p>
-                <div className="radio-group">
-                  <label><input type="radio" name="highDetail" value="일반" checked={highDetail === "일반"} onChange={(e) => setHighDetail(e.target.value)} />일반</label>
-                  <label><input type="radio" name="highDetail" value="예체능" checked={highDetail === "예체능"} onChange={(e) => setHighDetail(e.target.value)} />예체능</label>
-                  <label><input type="radio" name="highDetail" value="실업계" checked={highDetail === "실업계"} onChange={(e) => setHighDetail(e.target.value)} />실업계</label>
-                </div>
-              </>
-            )}
 
             {error && <p className="error-message">{error}</p>}
 
@@ -628,14 +593,10 @@ const LandingFAQModal = ({ onClose, onSelect }) => {
 
 
 /* -----------------------------------------------------
- /* -----------------------------------------------------
  * 6. 사이드바 컴포넌트
  * ----------------------------------------------------- */
-// ⭐ 중요: 이 컴포넌트가 있는 파일 상단이나 외부에 DUMMY_NOTICES를 선언해야 합니다.
-// (예: const DUMMY_NOTICES = [ { id: 1, title: "[공지]..." } ]; )
-// 현재는 DUMMY_NOTICES가 없다고 가정하고 빈 배열로 임시 처리했습니다.
-
-const Sidebar = ({ isOpen, onClose, onNewChat, messages }) => {
+// ⭐ 수정: onOpenPrivacy prop을 추가했습니다.
+const Sidebar = ({ isOpen, onClose, onNewChat, messages, onOpenPrivacy }) => { 
   const chatHistory = messages.filter(msg => msg.type === 'user' && !msg.typing)
                             .map(msg => msg.text)
                             .slice(0, 5) 
@@ -675,7 +636,7 @@ const Sidebar = ({ isOpen, onClose, onNewChat, messages }) => {
             )}
           </div>
           
-          {/* ⭐ [추가된 게시판 섹션] */}
+          {/* ⭐ [추가된 포털 사이트 섹션] */}
 
           <div className="sidebar-notice">
             <h5>포털 사이트</h5>
@@ -686,7 +647,7 @@ const Sidebar = ({ isOpen, onClose, onNewChat, messages }) => {
                       key={item.id} 
                       title={item.title}
                       // ❗ onClick 이벤트 수정: 새 창에서 item.link로 이동
-                      onClick={() => window.open(item.link, '_blank')} 
+                      onClick={() => item.link && window.open(item.link, '_blank')} 
                   >
                     {item.title.substring(0, 30)}...
                   </li>
@@ -698,7 +659,13 @@ const Sidebar = ({ isOpen, onClose, onNewChat, messages }) => {
           </div>
 
           <div className="sidebar-settings">
-            <h5>설정</h5>
+            <h5>설정 및 정보</h5>
+            <p 
+                onClick={onOpenPrivacy} // ⭐ [추가] 개인정보 처리 방침 클릭 핸들러
+                style={{ cursor: 'pointer', color: '#007bff', textDecoration: 'underline', marginBottom: '10px' }}
+            >
+                개인정보 처리 방침
+            </p>
             <p className="no-history">개인 설정 및 가이드</p>
           </div>
         </div>
@@ -729,6 +696,9 @@ function App() {
 
   // 사이드바 상태 관리
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  
+  // ⭐ [추가] 개인정보 처리 방침 모달 상태
+  const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false);
 
 
   const [isUserBubbleOpen, setIsUserBubbleOpen] = useState(false);
@@ -739,6 +709,15 @@ function App() {
   const toggleSidebar = () => {
     setIsSidebarOpen(prev => !prev);
   };
+  
+  // ⭐ [추가] 개인정보 처리 방침 모달 토글 함수
+  const togglePrivacyModal = () => {
+    setIsPrivacyModalOpen(prev => !prev);
+    if (isSidebarOpen) {
+        setIsSidebarOpen(false); // 사이드바가 열려있으면 닫아줍니다.
+    }
+  };
+
 
   const handleNewChat = () => {
     setMessages([]);
@@ -1114,6 +1093,7 @@ function App() {
             onClose={toggleSidebar} 
             onNewChat={handleNewChat}
             messages={messages}
+            onOpenPrivacy={togglePrivacyModal} // ⭐ [추가] 개인정보 처리 방침 토글 함수 전달
           />
 
           <header className="app-header">
@@ -1216,7 +1196,7 @@ function App() {
                                   src="/images/like-button.png"
                                   alt="도움돼요"
                                 />
-                                 <span className="tooltip">도움돼요</span> {/* ← 여기 */}
+                                 <span className="tooltip">도움돼요</span>
                               </button>
                               <button
                                 className={`feedback-btn ${
@@ -1231,7 +1211,7 @@ function App() {
                                   src="/images/thumbs-down.png"
                                   alt="도움 안돼요"
                                 />
-                                <span className="tooltip">도움 안돼요</span> {/* ← 여기 */}
+                                <span className="tooltip">도움 안돼요</span>
                               </button>
                             </div>
                           )}
@@ -1339,9 +1319,9 @@ function App() {
           </main>
 
           <button className="fab-contact" onClick={toggleContactModal}>
-  <img src="/images/ddon_ask.png" alt="문의하기" />
-  <span className="tooltip-text">1:1 문의하기</span>
-</button>
+              <img src="/images/ddon_ask.png" alt="문의하기" />
+              <span className="tooltip-text">1:1 문의하기</span>
+          </button>
 
           {isContactModalOpen && <ContactModal onClose={toggleContactModal} />}
           
@@ -1360,6 +1340,12 @@ function App() {
               onSelect={handleSubmit}
             />
           )}
+
+          {/* ⭐ [추가] 개인정보 처리 방침 모달 */}
+          {isPrivacyModalOpen && (
+            <PrivacyPolicyModal onClose={togglePrivacyModal} />
+          )}
+
         </div>
       )}
     </>
