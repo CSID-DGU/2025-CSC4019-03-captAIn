@@ -660,12 +660,7 @@ const Sidebar = ({ isOpen, onClose, onNewChat, messages, onOpenPrivacy }) => {
 
           <div className="sidebar-settings">
             <h5>설정 및 정보</h5>
-            <p 
-                onClick={onOpenPrivacy} // ⭐ [추가] 개인정보 처리 방침 클릭 핸들러
-                style={{ cursor: 'pointer', color: '#007bff', textDecoration: 'underline', marginBottom: '10px' }}
-            >
-                개인정보 처리 방침
-            </p>
+        
             <p className="no-history">개인 설정 및 가이드</p>
           </div>
         </div>
