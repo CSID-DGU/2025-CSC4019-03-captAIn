@@ -8,6 +8,7 @@ import PrivacyPolicyModal from './PrivacyPolicyModal';
 
 // API 엔드포인트
 const API_URL = process.env.REACT_APP_API_ENDPOINT || "YOUR_API_GATEWAY_URL";
+const FEEDBACK_API_URL = process.env.REACT_APP_FEEDBACK_ENDPOINT || "YOUR_FEEDBACK_LAMBDA_URL";
 
 /* -----------------------------------------------------
  * 0. 더미 사용자 데이터 (실제는 DB 사용)
@@ -773,215 +774,192 @@ function App() {
    * 채팅 제출 핸들러 (오류 수정 및 기능 통합 완료)
    * ----------------------------------------------------- */
   const handleSubmit = async (e, predefinedQuestion = null) => {
-    
-    // 1. 인자가 이벤트 객체인지 확인하고 preventDefault 호출
-    if (e && typeof e.preventDefault === 'function') {
-        e.preventDefault();
-    }
-    
-    // 2. 실제 보낼 메시지 결정
-    const messageToSend = predefinedQuestion || inputText.trim();
-    
-    if (!messageToSend || loading) return;
+      
+      // 1. 인자가 이벤트 객체인지 확인하고 preventDefault 호출
+      if (e && typeof e.preventDefault === 'function') {
+          e.preventDefault();
+      }
+      
+      // 2. 실제 보낼 메시지 결정
+      const messageToSend = predefinedQuestion || inputText.trim();
+      
+      if (!messageToSend || loading) return;
 
-    // 3. 텍스트를 초기화
-    setInputText("");
+      // 3. 텍스트를 초기화
+      setInputText("");
 
-    // 4. 로그인 체크 로직
-    if (!isLoggedIn) {
-        setMessages((prev) => [
-            ...prev,
-            { id: Date.now(), type: "user", text: messageToSend },
-            { id: Date.now() + 1, type: "bot", text: "로그인 후 이용 가능한 서비스입니다. 이용을 원하시면 먼저 로그인 또는 회원가입을 해주세요." }
-        ]);
-        return;
-    }
+      // [삭제됨] 4. 로그인 체크 로직 제거 (비로그인 채팅 허용)
+      /*
+      if (!isLoggedIn) {
+          setMessages((prev) => [
+              ...prev,
+              { id: Date.now(), type: "user", text: messageToSend },
+              { id: Date.now() + 1, type: "bot", text: "로그인 후 이용 가능한 서비스입니다..." }
+          ]);
+          return;
+      }
+      */
 
-    // 5. 메시지 처리
-    const newUserMessage = {
-      id: Date.now(),
-      type: "user",
-      text: messageToSend,
+      // 5. 메시지 처리
+      const newUserMessage = {
+        id: Date.now(),
+        type: "user",
+        text: messageToSend,
+      };
+      const typingMessage = { id: Date.now() + 1, type: "bot", typing: true };
+      setMessages((prev) => [...prev, newUserMessage, typingMessage]);
+
+      setLoading(true);
+
+    // 질문-답변 쌍 (DEMO_RESPONSES)
+    const DEMO_RESPONSES = {
+      // ... (기존 데모 응답 데이터는 너무 기니 생략, 기존 코드 유지하시면 됩니다) ...
+      // 만약 코드가 너무 길다면 이 부분은 기존 코드를 그대로 두셔도 됩니다.
+      // 핵심은 아래 try-catch 블록입니다.
     };
-    const typingMessage = { id: Date.now() + 1, type: "bot", typing: true };
-    setMessages((prev) => [...prev, newUserMessage, typingMessage]);
 
-    setLoading(true);
-
-   // 질문-답변 쌍 (DEMO_RESPONSES)
-   const DEMO_RESPONSES = {
-
-    "산모신생아 건강관리": {
-      title: "🤱 산모·신생아 건강관리 지원사업 (산후도우미)",
-      summary: "출산 가정을 대상으로 건강관리사를 파견하여 산모의 산후 회복과 신생아 양육을 지원하는 서비스입니다. 출산 가정의 경제적 부담 경감이 목적입니다.",
-      details: [
-          "**지원 대상:** 산모와 배우자의 건강보험료 합산액이 **기준 중위소득 150% 이하**인 출산 가정 (소득 기준 초과 시 지자체별 예외 지원 가능)",
-          "**지원 기간:** 태아 유형(단태아/다태아) 및 서비스 기간 선택에 따라 **5일~40일**까지 차등 지원됩니다.",
-          "**지원 내용:** 산모 건강관리(유방, 체조), 신생아 건강관리(목욕, 수유), 산모 식사 준비, 세탁물 및 청소 등 (단, 다른 가족 돌봄이나 일반 가사 활동은 부가 서비스로 별도 구매 필요)",
-          "**신청:** 출산 예정일 40일 전부터 출산일로부터 30일 이내에 주소지 관할 **보건소** 또는 **복지로**를 통해 신청합니다."
-      ],
-      // 정부24 링크
-      link: "https://www.gov.kr/mw/AA020InfoCappView.do?CappBizCD=13520000043"
-    }, 
-    
-    "출산 준비 및 계획": {
-        title: "🤰 출산 준비 및 계획",
-        summary: "건강한 출산과 준비를 돕기 위해 임신 전부터 출산 직전까지 다양한 의료 및 현물 지원이 이루어집니다.",
-        details: [
-            "**임신·출산 진료비 지원:** 국민행복카드 바우처 지급 (단태아 100만원, 다태아 140만원 → **2024년 기준 쌍둥이 200만원, 세쌍둥이 300만원 등 증액**)",
-            "**임신 사전 건강관리:** 임신을 희망하는 가임기 남녀에게 난소기능검사(여성), 정액검사(남성) 등 **가임력 검사 비용**을 지원합니다. (보건소 신청)",
-            "**엽산제/철분제 지급:** 임신 초기에는 엽산제를, 임신 16주 이후에는 철분제를 관할 **보건소**에서 지원받을 수 있습니다.",
-            "**출산휴가 및 근로시간 단축:** 근로자는 출산 전후 휴가와 임신기 근로시간 단축 제도(임신 12주 이내, 32주 이후 1일 2시간)를 활용할 수 있습니다."
-        ],
-        // 보건복지부 임신·출산 지원 정책 링크
-        link: "https://www.mohw.go.kr/menu.es?mid=a10711020100" 
-    },
-      
-    // 👇 아래는 문자열 답변 (링크 반영 완료)
-    "출산 지원금 알려줘": `[서울시 출산 지원금]
-      1. **첫만남 이용권:** 출생아당 200만원 바우처 지급 (일시금)
-      2. **서울형 산후조리경비 지원:** 출산일 기준 서울시 거주 6개월 이상 산모에게 100만원 상당의 산후조리경비 지급 (바우처 또는 현금)
-      3. **지자체별 추가 지원:** 동대문구 포함 각 자치구별로 추가 출산 양육 지원금이 별도로 있습니다. 거주지 동주민센터에 문의하거나 동대문구청 홈페이지를 확인해주세요!
-
-      **🔗 첫만남 이용권 신청 (복지로):** https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52005M.do?wlfareCd=355 `,
-      
-    "산모 건강관리 서비스 뭐 있어?": `[서울시 산모 건강관리 서비스]
-      1. **산후 도우미 지원:** 산모의 건강 회복과 신생아 양육을 위한 전문 인력(산후 도우미)을 가정에 파견하여 서비스 비용을 지원합니다. (소득 기준 적용)
-      2. **영양 플러스 사업:** 임산부 및 영유아의 영양 위험 요인을 개선하기 위해 보충 식품 및 영양 교육/상담을 제공합니다.
-      3. **임산부 엽산제/철분제 지원:** 임신 초기와 중기/후기 기간에 맞춰 보건소에서 무료로 엽산제와 철분제를 지원합니다.
-
-      **🔗 산모·신생아 건강관리 지원사업 (복지로):** https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52005M.do?wlfareCd=323 
-      **🔗 영양플러스 사업 (복지로):** https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52005M.do?wlfareCd=270`,
-      
-    "어린이집 신청 방법 알려줘": `어린이집 입소는 주로 **'복지로 임신육아종합포털 아이사랑(i-사랑)'**을 통해 온라인으로 신청합니다.
-      1. **접수:** 복지로 홈페이지(www.bokjiro.go.kr) 또는 모바일 앱에서 '보육료/양육수당'을 신청하고 '입소 대기'를 등록합니다.
-      2. **대기:** 원하는 어린이집에 입소 대기를 걸어둡니다. (최대 3개소)
-      3. **선정:** 어린이집 입소 우선순위(맞벌이, 다자녀 등)에 따라 입소 대상이 선정됩니다.
-
-      **🔗 복지로 임신육아종합포털 아이사랑:** https://www.childcare.go.kr/?menuno=1`,
-      
-    "임신부 교통비 지원돼?": `네, **서울시 임산부 교통비 지원 사업**이 있습니다.
-      1. **지원 대상:** 서울에 거주하는 모든 임산부 (임신 12주차~출산 후 3개월)
-      2. **지원 금액:** 1인당 70만원
-      3. **사용처:** 지하철, 버스, 택시, 자가용 유류비, 기차(KTX/SRT) 등
-      4. **신청:** 서울시 '맘편한 임신' 통합 서비스를 통해 온라인 신청 후, '국민행복카드'에 교통 포인트를 지급받아 사용합니다.
-
-      **🔗 정부24 임산부 교통비 신청:** https://www.gov.kr/portal/rcvfvrSvc/dtlEx/628000000735`,
-      
-    "육아휴직 급여 얼마나 받아?": `육아휴직 급여는 **고용보험**에서 지급하며, 주요 내용은 다음과 같습니다.
-      1. **지급 수준:** 휴직 기간(월별) 통상임금의 **80%** (상한액 150만원, 하한액 70만원)
-      2. **특례:** 부모가 순차적으로 육아휴직을 사용하는 **'3+3 부모 육아휴직제'**를 활용하면 생후 12개월 이내 자녀에 대해 3개월간 최대 통상임금의 100% (상한액 300만원)까지 지원됩니다.
-      *자세한 사항은 고용보험 홈페이지 또는 고용센터에 문의하세요.
-
-      **🔗 육아휴직 급여 (고용보험):** https://www.ei.go.kr/ei/eih/cm/hm/main.do`,
-      
-    "다자녀 혜택 뭐가 있어?": `동대문구를 기준으로 다자녀 가구에 제공되는 주요 혜택은 다음과 같습니다.
-      1. **공영주차장 이용요금 감면:** 두 자녀 이상 가구에 대해 공영주차장 요금 감면 혜택 제공.
-      2. **다자녀 교육비 지원:** (서울시) 고등학교 학비 지원, 대학생 등록금 지원 사업 등이 있습니다.
-      3. **공공 시설 할인:** 서울시 다둥이 행복 카드를 발급받으면 공공 시설(상수도 요금 포함) 및 제휴 업체 할인을 받을 수 있습니다.
-
-      **🔗 서울시 다둥이 행복카드:** https://news.seoul.go.kr/welfare/archives/515568`,
-};
-
-    if (DEMO_RESPONSES[messageToSend]) {
-      await new Promise((resolve) => setTimeout(resolve, 3500));
-      
-      const responseContent = DEMO_RESPONSES[messageToSend];
-
-      let formattedText;
-      if (typeof responseContent === 'object' && responseContent.title) {
-          // 💡 수정: 객체 답변을 포맷된 문자열로 변환합니다. (오류 해결)
-          formattedText = `**${responseContent.title}**\n\n${responseContent.summary}\n\n**상세 내용:**\n${responseContent.details.join('\n')}\n\n**🔗 정보 확인:** ${responseContent.link}`;
-      } else {
-          // 문자열 답변은 그대로 사용
-          formattedText = responseContent;
+      // (데모 응답 처리 로직 - 기존 유지)
+      if (DEMO_RESPONSES && DEMO_RESPONSES[messageToSend]) {
+        await new Promise((resolve) => setTimeout(resolve, 3500));
+        const responseContent = DEMO_RESPONSES[messageToSend];
+        let formattedText;
+        if (typeof responseContent === 'object' && responseContent.title) {
+            formattedText = `**${responseContent.title}**\n\n${responseContent.summary}\n\n**상세 내용:**\n${responseContent.details.join('\n')}\n\n**🔗 정보 확인:** ${responseContent.link}`;
+        } else {
+            formattedText = responseContent;
+        }
+        const demoResponse = {
+          id: Date.now() + 2,
+          type: "bot",
+          text: formattedText,
+          feedback: null,
+        };
+        setMessages((prev) => prev.slice(0, -1).concat(demoResponse));
+        setLoading(false);
+        return;
       }
 
-      const demoResponse = {
-        id: Date.now() + 2,
-        type: "bot",
-        text: formattedText, // <--- 수정: 포맷된 문자열을 사용합니다.
-        feedback: null,
-      };
+      try {
+        // [수정됨] 로그인 상태에 따라 user_context 포함 여부 결정
+        const payload = {
+          question: messageToSend,
+          user_context: (isLoggedIn && currentUser) ? {
+              gu: currentUser.dong, // 회원가입 시 저장한 '구' 정보
+              is_pregnant: currentUser.isPregnant === "임신 중",
+              has_child: currentUser.hasChild === "유",
+              // 필요한 경우 추가 정보 포함
+          } : null // 비로그인 시 null 전송
+        };
 
-      setMessages((prev) => prev.slice(0, -1).concat(demoResponse));
-      setLoading(false);
-      return;
-    }
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload), // 수정된 payload 사용
+        });
+        const data = await response.json();
+        const newBotMessage = {
+          id: Date.now() + 2,
+          type: "bot",
+          text:
+            data.answer ||
+            "죄송해요, 답변을 찾을 수 없었어요. 다른 질문을 해주세요!",
+          feedback: null,
+        };
 
-    try {
-      const response = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: messageToSend }),
-      });
-      const data = await response.json();
-      const newBotMessage = {
-        id: Date.now() + 2,
-        type: "bot",
-        text:
-          data.answer ||
-          "죄송해요, 답변을 찾을 수 없었어요. 다른 질문을 해주세요!",
-        feedback: null,
-      };
+        console.log("================== 답변 전체 (복사용) ==================");
+        console.log(newBotMessage.text);
+        console.log("========================================================");
 
-      console.log("================== 답변 전체 (복사용) ==================");
-      console.log(newBotMessage.text);
-      console.log("========================================================");
-
-      setMessages((prev) => prev.slice(0, -1).concat(newBotMessage));
-    } catch (error) {
-      const errorMessage = {
-        id: Date.now() + 2,
-        type: "bot",
-        text: "오류가 발생했어요. 잠시 후 다시 시도해주세요!",
-        feedback: null,
-      };
-      setMessages((prev) => prev.slice(0, -1).concat(errorMessage));
-    } finally {
-      setLoading(false);
-    }
-  };
+        setMessages((prev) => prev.slice(0, -1).concat(newBotMessage));
+      } catch (error) {
+        const errorMessage = {
+          id: Date.now() + 2,
+          type: "bot",
+          text: "오류가 발생했어요. 잠시 후 다시 시도해주세요!",
+          feedback: null,
+        };
+        setMessages((prev) => prev.slice(0, -1).concat(errorMessage));
+      } finally {
+        setLoading(false);
+      }
+    };
 
   /* -----------------------------------------------------
    * 기타 핸들러 및 렌더링 도우미 함수
    * ----------------------------------------------------- */
 
-  const handleFeedback = (id, feedbackType) => {
+  const handleFeedback = async (id, feedbackType) => {
+    // 1. UI 상태 업데이트 (기존 코드 유지)
     setMessages((prevMessages) =>
       prevMessages.map((msg) => {
         if (msg.id === id) {
-          if (msg.feedback === feedbackType) {
-            return { ...msg, feedback: null };
-          }
+          if (msg.feedback === feedbackType) return { ...msg, feedback: null };
           return { ...msg, feedback: feedbackType };
         }
         return msg;
       })
     );
+
+    // 2. 서버로 전송 (추가된 코드)
+    const targetMessage = messages.find(m => m.id === id);
+    
+    try {
+        // 실제 람다 함수로 데이터 전송
+        await fetch(FEEDBACK_API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                type: feedbackType.toUpperCase(), // 'LIKE' or 'DISLIKE'
+                user_id: currentUser ? currentUser.email : 'anonymous',
+                content: {
+                    // 어떤 질문에 대한 평가인지 알기 위해 간략 정보 전송
+                    answer_id: id, 
+                    answer_text: targetMessage ? targetMessage.text.substring(0, 100) + "..." : "내용 없음"
+                }
+            })
+        });
+        console.log(`피드백(${feedbackType}) 전송 완료`);
+    } catch (e) {
+        console.error("피드백 전송 실패:", e);
+    }
   };
 
+  /* -----------------------------------------------------
+   * 렌더링 도우미 함수 (수정됨: 마크다운 기호 제거)
+   * ----------------------------------------------------- */
   const renderMessageContent = (text) => {
-    // 💡 수정: text가 문자열이 아닐 경우 문자열로 강제 변환하여 오류 방지
+    // text가 문자열이 아닐 경우 강제 변환
     if (typeof text !== 'string') {
-        // console.error("renderMessageContent received non-string data:", text); // 디버깅용
         return String(text); 
     }
 
+    // 1. 마크다운 기호 제거 (정규식 활용)
+    let cleanText = text
+        .replace(/\*\*(.*?)\*\*/g, '$1') // **볼드** -> 볼드
+        .replace(/__(.*?)__/g, '$1')     // __볼드__ -> 볼드
+        .replace(/^#+\s/gm, '')          // # 헤더 -> 헤더
+        .replace(/`([^`]+)`/g, '$1');    // `코드` -> 코드
+        // 필요하면 다른 마크다운 기호도 추가 가능
+
+    // 2. URL 링크 처리 (기존 로직 유지)
     const urlRegex = /(https?:\/\/[^\s\)]+)/g;
-    if (!text.match(urlRegex)) {
-      return text;
+    
+    if (!cleanText.match(urlRegex)) {
+      return cleanText;
     }
-    const parts = text.split(urlRegex);
+    
+    const parts = cleanText.split(urlRegex);
     return parts.map((part, index) => {
       if (part.match(urlRegex)) {
         const cleanUrl = part.replace(/[)\]}>]$/, "");
         let displayText = "🔗 바로가기";
+        
         if (cleanUrl.includes("ddm.go.kr")) {
           displayText = "🔗 동대문구청 바로가기";
         } else if (cleanUrl.includes(".hs.kr") || cleanUrl.includes(".ms.kr")) {
           displayText = "🏫 학교 홈페이지";
         }
+        
         return (
           <a
             key={index}
@@ -1008,11 +986,34 @@ function App() {
     const [email, setEmail] = useState("");
     const [message, setMessage] = useState("");
 
-    const handleMessageSubmit = (e) => {
+    const handleMessageSubmit = async (e) => {
       e.preventDefault();
-      console.log("메시지 전송:", { name, email, message });
-      console.log("메시지가 성공적으로 전송되었습니다!");
-      onClose(); 
+      
+      try {
+          // 문의 내용을 서버로 전송
+          const response = await fetch(FEEDBACK_API_URL, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                  type: 'INQUIRY', // 타입: 문의사항
+                  user_id: email,  // 입력한 이메일
+                  content: {
+                      name: name,
+                      message: message
+                  }
+              })
+          });
+
+          if (response.ok) {
+              alert("문의가 성공적으로 접수되었습니다!"); 
+              onClose();
+          } else {
+              throw new Error('전송 실패');
+          }
+      } catch (error) {
+          console.error("문의 전송 실패", error);
+          alert("오류가 발생했습니다. 다시 시도해주세요.");
+      }
     };
 
     return (
@@ -1289,16 +1290,16 @@ function App() {
                       handleSubmit(e);
                     }
                   }}
+                  // [수정됨] 로그인 여부와 관계없이 항상 질문 유도 문구 표시
                   placeholder={
-                    isLoggedIn
-                      ? isChatStarted
-                        ? "질문을 입력하세요..."
-                        : "임신 및 양육 정책 등 무엇이든 물어보세요!"
-                      : "로그인 후 질문을 입력해주세요."
+                    isChatStarted
+                      ? "질문을 입력하세요..."
+                      : "임신 및 양육 정책 등 무엇이든 물어보세요!"
                   }
                   className="idea-textarea"
                   rows={isChatStarted ? 1 : 1}
-                  disabled={loading || !isLoggedIn} 
+                  // [수정됨] !isLoggedIn 제거 (로딩 중일 때만 비활성)
+                  disabled={loading} 
                 />
                 <div className="form-footer">
                   {!isChatStarted && (
@@ -1309,7 +1310,8 @@ function App() {
                   <button
                     type="submit"
                     className="submit-button"
-                    disabled={loading || !inputText || !isLoggedIn}
+                    // [수정됨] !isLoggedIn 제거 (로딩 중이거나 입력값 없을 때만 비활성)
+                    disabled={loading || !inputText}
                   >
                     {loading ? <div className="spinner"></div> : "↑"}
                   </button>
