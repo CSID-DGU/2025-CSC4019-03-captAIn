@@ -1201,7 +1201,7 @@ const Sidebar = ({ isOpen, onClose, onNewChat, messages, onOpenPrivacy }) => {
                       item.link && window.open(item.link, "_blank")
                     }
                   >
-                    {item.title.substring(0, 30)}...
+                    {item.title.substring(0, 30)}
                   </li>
                 ))}
               </ul>

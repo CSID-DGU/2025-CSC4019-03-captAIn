@@ -251,30 +251,45 @@ body {
 }
 
 /* [추가] 게시판 목록 스타일 */
+/* [수정] 포털 사이트 목록을 버튼 느낌으로 변경 */
 .sidebar-notice ul {
   list-style: none;
   padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;              /* 항목 간 간격 */
 }
+
 .sidebar-notice li {
-  font-size: 14px;
+  font-size: 13px;
   color: #333;
-  padding: 8px 0;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+  padding: 8px 10px;
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
   cursor: pointer;
-  border-bottom: 1px solid #eeeeee; /* 항목 구분선 추가 */
+  line-height: 1.4;
+  
+  /* 줄바꿈 허용 + ... 제거 */
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
+
+  /* 버튼처럼 꽉 찬 느낌을 주기 위한 설정 */
+  display: block;
 }
-.sidebar-notice li:last-child {
-  border-bottom: none; /* 마지막 항목의 구분선 제거 */
-}
+
 .sidebar-notice li:hover {
-  background-color: #e0e0e0;
+  background-color: #e0e8ef;  /* 기존 톤과 맞는 연한 블루 */
+  border-color: #c8d4e3;
 }
+
 .sidebar-notice p.no-content {
   color: #888;
   font-size: 14px;
 }
+
 /* -----------------------------------------------------
  * 기존 스타일 (Auth, Modals, Chat, Landing)
  * ----------------------------------------------------- */
