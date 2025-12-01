@@ -58,7 +58,7 @@ function FAQList({ onSelect }) {
           <div className="faq-line-right"></div>
         </div>
         
-        {/* 절대 위치로 오른쪽 끝에 배치되는 열기/접기 버튼 */}
+        {/* 오른쪽 끝 열기/접기 버튼 */}
         <div
           onClick={() => setIsOpen(prev => !prev)}
           className="faq-toggle-button"
@@ -80,44 +80,44 @@ function FAQList({ onSelect }) {
       {/* FAQ 버튼들 */}
       {isOpen && (
         <div className="faq-grid">
-        {faqs.map((faq, index) => (
-          <button
-            key={index}
-            onClick={() => {
-              if (typeof onSelect === 'function') onSelect(faq.text);
-            }}
-            onMouseEnter={() => setHoveredIndex(index)}
-            onMouseLeave={() => setHoveredIndex(null)}
-            className="faq-item-button"
-          >
-            {/* 카테고리 태그 */}
-            <div className="faq-item-header">
-              <span className="faq-category-tag">
-                {faq.category}
-              </span>
-              
-              {/* 호버 시 화살표 */}
-              <div className={`faq-arrow-icon-wrapper ${
-                hoveredIndex === index ? 'opacity-100 translate-x-0' : 'opacity-0'
-              }`}>
-                <svg className="faq-arrow-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
+          {faqs.map((faq, index) => (
+            <button
+              key={index}
+              onClick={() => {
+                if (typeof onSelect === 'function') onSelect(faq.text);
+              }}
+              onMouseEnter={() => setHoveredIndex(index)}
+              onMouseLeave={() => setHoveredIndex(null)}
+              className="faq-item-button"
+            >
+              {/* 카테고리 태그 */}
+              <div className="faq-item-header">
+                <span className="faq-category-tag">
+                  {faq.category}
+                </span>
+                
+                {/* 호버 시 화살표 */}
+                <div className={`faq-arrow-icon-wrapper ${
+                  hoveredIndex === index ? 'opacity-100 translate-x-0' : 'opacity-0'
+                }`}>
+                  <svg className="faq-arrow-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
               </div>
-            </div>
-            
-            {/* 아이콘과 질문 텍스트 */}
-            <div className="faq-item-content">
-              <span className="faq-item-icon">{faq.icon}</span>
-              <span className="faq-item-text">
-                {faq.text}
-              </span>
-            </div>
-            
-            {/* 호버 효과 배경 */}
-            <div className="faq-hover-bg" />
-          </button>
-        ))}
+              
+              {/* 아이콘과 질문 텍스트 */}
+              <div className="faq-item-content">
+                <span className="faq-item-icon">{faq.icon}</span>
+                <span className="faq-item-text">
+                  {faq.text}
+                </span>
+              </div>
+              
+              {/* 호버 효과 배경 */}
+              <div className="faq-hover-bg" />
+            </button>
+          ))}
         </div>
       )}
       
@@ -125,8 +125,12 @@ function FAQList({ onSelect }) {
       {isOpen && (
         <div className="faq-guidance-text">
           <p>
-            다른 궁금한 점이 있으시면 아래 채팅창에 직접 질문해보세요! 
-            <span style={{marginLeft: '0.25rem'}}>💬</span>
+            위 질문은 예시예요. 우리 집 상황(거주 구, 자녀 수, 맞벌이 여부 등)을 함께 적어서
+            <br />
+            <span style={{ fontWeight: 500 }}>
+              “송파구 맞벌이, 첫째 3살인데 받을 수 있는 지원 한 번에 정리해줘”
+            </span>
+            처럼 아래 채팅창에 직접 질문해보면 더 정확한 안내를 받을 수 있습니다. 💬
           </p>
         </div>
       )}
