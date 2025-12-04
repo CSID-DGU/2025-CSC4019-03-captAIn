@@ -16,6 +16,9 @@ const IS_API_CONFIGURED = API_URL && API_URL !== "YOUR_API_GATEWAY_URL";
 const IS_FEEDBACK_CONFIGURED =
   FEEDBACK_API_URL && FEEDBACK_API_URL !== "YOUR_FEEDBACK_LAMBDA_URL";
 
+
+
+
 /* -----------------------------------------------------
  * 0. 더미 사용자 데이터 (실제는 DB 사용)
  * ----------------------------------------------------- */
@@ -1232,6 +1235,208 @@ const Sidebar = ({ isOpen, onClose, onNewChat, messages, onOpenPrivacy }) => {
 };
 
 /* -----------------------------------------------------
+ * 🔔 6-1. 알림 벨 컴포넌트
+ * ----------------------------------------------------- */
+const NotificationBell = ({
+  count,
+  notifications,
+  isOpen,
+  onToggle,
+  onItemClick,
+  onOpenAll,
+}) => {
+  return (
+    <div className="notification-wrapper">
+      <button
+  type="button"
+  className="notification-bell"
+  onClick={onToggle}
+  title="맞춤 알림"
+>
+  <img
+    src="/images/notification.png"
+    alt="맞춤 알림"
+    className="bell-icon"
+  />
+  {count > 0 && <span className="notification-badge">{count}</span>}
+</button>
+
+
+           {isOpen && (
+        <div className="notification-panel">
+          <h5 className="notification-title">맞춤 정책 알림</h5>
+          {notifications.length === 0 ? (
+            <p className="notification-empty">현재 맞춤 알림이 없습니다.</p>
+          ) : (
+            <>
+              <ul className="notification-list">
+                {notifications.map((item) => (
+                  <li
+                    key={item.id}
+                    className="notification-item"
+                    onClick={() => onItemClick(item)}
+                  >
+                    <span className="notification-item-title">
+                      {item.title}
+                    </span>
+                    {item.link && (
+                      <button
+                        className="notification-link-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          window.open(item.link, "_blank");
+                        }}
+                      >
+                        바로가기
+                      </button>
+                    )}
+                  </li>
+                ))}
+              </ul>
+
+              {/* 🔹 전체 알림 보기 버튼 */}
+              {onOpenAll && (
+                <button
+                  type="button"
+                  className="notification-view-all-btn"
+                  onClick={onOpenAll}
+                >
+                  전체 알림 보기
+                </button>
+              )}
+            </>
+          )}
+        </div>
+      )}
+
+    </div>
+  );
+};
+
+/* -----------------------------------------------------
+ * 🔧 CSV 유틸 함수
+ *  - /public/data/policies.csv 기준
+ *  - 예시 헤더:
+ *    id,title,link,gu,income,has_child,is_pregnant
+ * ----------------------------------------------------- */
+
+// CSV 문자열 -> 정책 객체 배열로 변환
+// CSV 문자열 -> 정책 객체 배열로 변환
+function parseCsvTextToPolicies(csvText) {
+  if (!csvText) return [];
+
+  const lines = csvText.trim().split(/\r?\n/);
+  if (lines.length <= 1) return [];
+
+  const headers = lines[0].split(",").map((h) => h.trim());
+  const policies = [];
+
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line) continue;
+
+    const cols = line.split(",").map((c) => c.trim());
+    const row = {};
+    headers.forEach((h, idx) => {
+      row[h] = cols[idx] ?? "";
+    });
+
+    // ⚠ child_age_ 컬럼 이름은 실제 CSV 헤더에 맞게 바꿔주세요
+    policies.push({
+      id: row.id || i,
+      title: row.title || "",
+      link: row.link || "",
+
+      // 지역
+      gu: row.gu || "",          // "ALL", "강남구" 등
+
+      // 소득 타깃 (ALL / LOW 등)
+      income_ta: row.income_ta || "ALL",
+
+      // 자녀 필수 여부 (Y / N)
+      require_ch: row.require_ch || "N",
+
+      // 임신 필수 여부 (Y / N)
+      require_pr: row.require_pr || "N",
+
+      // 자녀 나이 조건 (지금은 안 써도 됨)
+      child_age_min: row.child_age_min
+        ? Number(row.child_age_min)
+        : -1,
+      child_age_max: row.child_age_max
+        ? Number(row.child_age_max)
+        : -1,
+
+      // 장애 필수 여부 (ANY / Y 등)
+      require_disability: row.require_disability || "ANY",
+    });
+  }
+
+  return policies;
+}
+
+// 한 정책이 현재 로그인한 사용자와 매치되는지 여부
+// 🔧 한 정책이 현재 로그인한 사용자와 매치되는지 여부
+function isPolicyMatchUser(policy, user) {
+  if (!user || !policy) return false;
+
+  // 1) 지역 조건
+  // - gu === "ALL"  : 전국/서울 공통 → 누구나
+  // - gu === "서울시": 서울시 공통
+  // - gu === user.gu: 해당 구 전용
+  if (
+    policy.gu &&
+    policy.gu !== "ALL" &&
+    policy.gu !== "서울시" &&
+    policy.gu !== user.gu
+  ) {
+    // 다른 구 전용 정책은 제외
+    return false;
+  }
+
+  // 2) 자녀 필수 (require_ch === 'Y' 인데 자녀가 없으면 "대상 아님" → 제외)
+  if (policy.require_ch === "Y" && user.hasChild !== "유") {
+    return false;
+  }
+
+  // 3) 임신 필수 (require_pr === 'Y' 인데 임신/준비 상태가 아니면 제외)
+  if (policy.require_pr === "Y") {
+    const preg = user.isPregnant || "해당 없음";
+    if (preg !== "임신 중" && preg !== "임신 준비 중") {
+      return false;
+    }
+  }
+
+  // 4) 소득 타깃
+  // - income_ta === 'ALL'   : 소득 상관 없음 → 통과
+  // - income_ta === 'LOW'   : 저소득 가구 타깃
+  //   → 사용자가 '중위소득 초과'면 "대상 아님"이라 보고 제외
+  if (policy.income_ta && policy.income_ta !== "ALL") {
+    if (
+      policy.income_ta === "LOW" &&
+      user.incomeLevel === "중위소득 초과"
+    ) {
+      return false;
+    }
+  }
+
+  // 5) 장애 필수
+  if (
+    policy.require_disability === "Y" &&
+    user.hasDisability !== "있음"
+  ) {
+    return false;
+  }
+
+  // 👉 여기까지에서 "확실히 대상 아님"인 경우만 걸러냈고,
+  //    나머지는 모두 알림으로 보여줍니다.
+  return true;
+}
+
+
+
+
+/* -----------------------------------------------------
  * 7. 메인 App 컴포넌트
  * ----------------------------------------------------- */
 function App() {
@@ -1241,6 +1446,11 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const chatEndRef = useRef(null);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [isNotificationListOpen, setIsNotificationListOpen] = useState(false);
+
 
   // 인증/모달 상태 관리
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -1279,7 +1489,17 @@ function App() {
     setIsSidebarOpen(false);
     setInputText("");
   };
+  // 알림 관련 핸들러 추가
+  const toggleNotificationBell = () => {
+    setIsNotificationOpen((prev) => !prev);
+    setUnreadCount(0);
+  };
 
+  const handleNotificationItemClick = (policy) => {
+    const autoQuestion = `${policy.title} 지원 정책 자세히 알려줘`;
+    handleSubmit(null, autoQuestion);
+    setIsNotificationOpen(false);
+  };
   /* -----------------------------------------------------
    * 인증/모달 핸들러
    * ----------------------------------------------------- */
@@ -1321,6 +1541,33 @@ function App() {
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+   // 🔔 로그인 상태/유저 정보 바뀔 때 CSV 읽어서 알림 필터링
+  useEffect(() => {
+    const loadUserNotifications = async (user) => {
+      try {
+        const res = await fetch(process.env.PUBLIC_URL + "/data/policies.csv");
+        const text = await res.text();
+        const allPolicies = parseCsvTextToPolicies(text); // 위에서 만든 유틸 함수
+        const matched = allPolicies.filter((p) => isPolicyMatchUser(p, user)); // 위 유틸 사용
+
+        setNotifications(matched);
+        setUnreadCount(matched.length); // 처음엔 전부 "안 읽음" 처리
+      } catch (e) {
+        console.error("알림 CSV 로딩 실패:", e);
+        setNotifications([]);
+        setUnreadCount(0);
+      }
+    };
+
+    if (isLoggedIn && currentUser) {
+      loadUserNotifications(currentUser);
+    } else {
+      setNotifications([]);
+      setUnreadCount(0);
+      setIsNotificationOpen(false);
+    }
+  }, [isLoggedIn, currentUser]);   // 🔚 의존성
 
   /* -----------------------------------------------------
    * 채팅 제출 핸들러
@@ -1536,6 +1783,68 @@ function App() {
   };
 
   /* -----------------------------------------------------
+ * 🔔 알림 전체 보기 모달
+ * ----------------------------------------------------- */
+const NotificationListModal = ({ notifications, onClose, onItemClick }) => {
+  return (
+    <div className="contact-modal-overlay" onClick={onClose}>
+      <div
+        className="contact-modal-content notification-list-modal"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="modal-header">
+          <h3>맞춤 정책 알림 전체 보기</h3>
+          <button className="modal-close-btn" onClick={onClose}>
+            ×
+          </button>
+        </div>
+        <div className="modal-body">
+          {notifications.length === 0 ? (
+            <p>현재 등록된 맞춤 알림이 없습니다.</p>
+          ) : (
+            <ul className="notification-list-full">
+              {notifications.map((item) => (
+                <li
+                  key={item.id}
+                  className="notification-item-full"
+                  onClick={() => onItemClick(item)}
+                >
+                  <div className="notification-item-main">
+                    <span className="notification-item-title">
+                      {item.title}
+                    </span>
+                    {/* gu, 소득 타깃 같은 태그 보여주고 싶으면 여기서 */}
+                    {item.gu && (
+                      <span className="notification-item-tag">
+                        {item.gu}
+                      </span>
+                    )}
+                  </div>
+
+                  {item.link && (
+                    <button
+                      type="button"
+                      className="notification-link-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        window.open(item.link, "_blank");
+                      }}
+                    >
+                      정책 페이지
+                    </button>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+  /* -----------------------------------------------------
    * '메시지 보내기' 모달 컴포넌트
    * ----------------------------------------------------- */
   const ContactModal = ({ onClose }) => {
@@ -1642,6 +1951,9 @@ function App() {
 
   const isChatStarted = messages.length > 0;
 
+ 
+
+
   /* -----------------------------------------------------
    * 렌더링
    * ----------------------------------------------------- */
@@ -1661,64 +1973,77 @@ function App() {
           />
 
           <header className="app-header">
-            <div className="header-left">
-              <button
-                className="sidebar-toggle-btn"
-                onClick={toggleSidebar}
-                title="메뉴 열기"
-              >
-                &#9776;
-              </button>
+  <div className="header-left">
+    <button
+      className="sidebar-toggle-btn"
+      onClick={toggleSidebar}
+      title="메뉴 열기"
+    >
+      &#9776;
+    </button>
 
-              <span
-                className="logo-text"
-                onClick={() => setMessages([])}
-                style={{ cursor: "pointer" }}
-              >
-                SEOUL<span className="highlight">-I</span>
-              </span>
-              {isLoggedIn && (
-                <span className="welcome-message">
-                  {currentUser?.name}님 환영합니다!
-                </span>
-              )}
-            </div>
+    <span
+      className="logo-text"
+      onClick={() => setMessages([])}
+      style={{ cursor: "pointer" }}
+    >
+      SEOUL<span className="highlight">-I</span>
+    </span>
+    {isLoggedIn && (
+      <span className="welcome-message">
+        {currentUser?.name}님 환영합니다!
+      </span>
+    )}
+  </div>
 
-            <div className="header-right" style={{ position: "relative" }}>
-              {isLoggedIn ? (
-                <>
-                  <img
-                    src="/images/user_icon.png"
-                    className="profile-icon"
-                    onClick={toggleUserBubble}
-                    alt="프로필"
-                    style={{ cursor: "pointer" }}
-                  />
-                  <button
-                    onClick={handleLogout}
-                    className="auth-button logout"
-                  >
-                    로그아웃
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button onClick={openLogin} className="auth-button">
-                    로그인
-                  </button>
-                  <button
-                    onClick={openSignup}
-                    className="auth-button signup-btn"
-                  >
-                    회원가입
-                  </button>
-                </>
-              )}
-              {isUserBubbleOpen && currentUser && (
-                <UserBubble user={currentUser} onClose={toggleUserBubble} />
-              )}
-            </div>
-          </header>
+  <div className="header-right" style={{ position: "relative" }}>
+    {isLoggedIn ? (
+      <>
+        {/* 🔔 맞춤 알림 벨 */}
+        <NotificationBell
+          count={unreadCount}
+          notifications={notifications}
+          isOpen={isNotificationOpen}
+          onToggle={toggleNotificationBell}
+          onItemClick={handleNotificationItemClick}
+           onOpenAll={() => setIsNotificationListOpen(true)}
+        />
+
+        {/* 프로필 아이콘 / 로그아웃 */}
+        <img
+          src="/images/user_icon.png"
+          className="profile-icon"
+          onClick={toggleUserBubble}
+          alt="프로필"
+          style={{ cursor: "pointer" }}
+        />
+        <button
+          onClick={handleLogout}
+          className="auth-button logout"
+        >
+          로그아웃
+        </button>
+      </>
+    ) : (
+      <>
+        <button onClick={openLogin} className="auth-button">
+          로그인
+        </button>
+        <button
+          onClick={openSignup}
+          className="auth-button signup-btn"
+        >
+          회원가입
+        </button>
+      </>
+    )}
+
+    {isUserBubbleOpen && currentUser && (
+      <UserBubble user={currentUser} onClose={toggleUserBubble} />
+    )}
+  </div>
+</header>
+
 
           <main className="main-content">
             {isChatStarted ? (
@@ -1914,6 +2239,15 @@ function App() {
           {isPrivacyModalOpen && (
             <PrivacyPolicyModal onClose={togglePrivacyModal} />
           )}
+
+          {isNotificationListOpen && (
+  <NotificationListModal
+    notifications={notifications}
+    onClose={() => setIsNotificationListOpen(false)}
+    onItemClick={handleNotificationItemClick}
+  />
+)}
+
         </div>
       )}
     </>
